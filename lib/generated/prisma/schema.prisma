@@ -1,0 +1,392 @@
+generator client {
+  provider      = "prisma-client-js"
+  output        = "../lib/generated/prisma"
+  binaryTargets = ["native", "windows", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ----------------------------------------------------------------------------
+// Better Auth core tables
+// ----------------------------------------------------------------------------
+
+enum Role {
+  VISITEUR
+  AGENT
+  MANAGER
+  ADMIN
+}
+
+model User {
+  id            String   @id
+  name          String
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  image         String?
+  role          Role     @default(VISITEUR)
+  banned        Boolean  @default(false)
+  phone         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  sessions Session[]
+  accounts Account[]
+
+  client            Client?
+  dossiersAgent     Dossier[]  @relation("AgentDossiers")
+  taches            Tache[]
+  uploadedDocuments Document[] @relation("UploadedDocuments")
+  personalDocuments Document[] @relation("PersonalDocuments")
+  avis              Avis[]     @relation("UserAvis")
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("verification")
+}
+
+// ----------------------------------------------------------------------------
+// Business domain
+// ----------------------------------------------------------------------------
+
+enum DossierType {
+  VISA
+  LOCATION_VOITURE
+  ASSURANCE_VOYAGE
+  RESERVATION_HOTEL
+  PASSEPORT
+  AUTRE
+}
+
+enum DossierStatut {
+  BROUILLON
+  EN_ATTENTE
+  DOCUMENTS_MANQUANTS
+  EN_COURS
+  VALIDE
+  REFUSE
+  TERMINE
+  ARCHIVE
+}
+
+enum DocumentType {
+  PDF
+  WORD
+  EXCEL
+  JPEG
+  PNG
+  AUTRE
+}
+
+enum TachePriorite {
+  BASSE
+  NORMALE
+  HAUTE
+  URGENTE
+}
+
+enum TacheStatut {
+  A_FAIRE
+  EN_COURS
+  TERMINEE
+  ANNULEE
+}
+
+model Client {
+  id            String    @id @default(uuid())
+  nom           String
+  postnom       String?
+  prenom        String?
+  dateNaissance DateTime?
+  telephone     String?
+  email         String
+  adresse       String?
+  photo         String?
+  archived      Boolean   @default(false)
+  // Optional link to a login account
+  userId        String?   @unique
+  user          User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  dossiers  Dossier[]
+  documents Document[]
+
+  @@map("client")
+}
+
+model Dossier {
+  id      String        @id @default(uuid())
+  numero  String        @unique
+  nom     String
+  type    DossierType
+  statut  DossierStatut @default(BROUILLON)
+  notes   String?
+  qrCode  String?       @db.Text
+  montant Float         @default(0)
+
+  clientId String
+  client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  agentId String?
+  agent   User?   @relation("AgentDossiers", fields: [agentId], references: [id], onDelete: SetNull)
+
+  // Process instance: the dossier follows a process definition.
+  processDefinitionId String?
+  processDefinition   ProcessDefinition? @relation(fields: [processDefinitionId], references: [id], onDelete: SetNull)
+  // Index (ordre) of the step currently being worked on.
+  etapeActuelle       Int                @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  documents     Document[]
+  taches        Tache[]
+  statutHistory DossierStatutHistory[]
+  stepStates    DossierStepState[]
+
+  @@map("dossier")
+}
+
+model DossierStatutHistory {
+  id            String         @id @default(uuid())
+  dossierId     String
+  dossier       Dossier        @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+  ancienStatut  DossierStatut?
+  nouveauStatut DossierStatut
+  userId        String?
+  userName      String?
+  createdAt     DateTime       @default(now())
+
+  @@index([dossierId])
+  @@map("dossier_statut_history")
+}
+
+model Document {
+  id      String       @id @default(uuid())
+  titre   String
+  type    DocumentType
+  fichier String
+  taille  Int          @default(0)
+
+  clientId String?
+  client   Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  dossierId String?
+  dossier   Dossier? @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+
+  // Optional link to a process instance sub-step this document was attached to.
+  subStepStateId String?
+  subStepState   DossierSubStepState? @relation(fields: [subStepStateId], references: [id], onDelete: SetNull)
+
+  // Who uploaded the document, so visitors can manage only their own files.
+  uploadedById String?
+  uploadedBy   User?   @relation("UploadedDocuments", fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  // Personal documents attached directly to a user's profile (ID card, passport...).
+  userId String?
+  user   User?   @relation("PersonalDocuments", fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([uploadedById])
+  @@index([userId])
+  @@map("document")
+}
+
+// ----------------------------------------------------------------------------
+// Process definitions (layouts / templates) and dossier instances
+// ----------------------------------------------------------------------------
+
+model ProcessDefinition {
+  id          String   @id @default(uuid())
+  nom         String
+  description String?
+  dureeJours  Int      @default(0) // approximate duration in days
+  cout        Float    @default(0)
+  actif       Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  steps    ProcessStep[]
+  dossiers Dossier[]
+
+  @@map("process_definition")
+}
+
+model ProcessStep {
+  id          String            @id @default(uuid())
+  processId   String
+  process     ProcessDefinition @relation(fields: [processId], references: [id], onDelete: Cascade)
+  ordre       Int
+  nom         String
+  dureeJours  Int               @default(0)
+  description String?
+  commentaire String?
+
+  subSteps   ProcessSubStep[]
+  stepStates DossierStepState[]
+
+  @@index([processId])
+  @@map("process_step")
+}
+
+model ProcessSubStep {
+  id              String      @id @default(uuid())
+  stepId          String
+  step            ProcessStep @relation(fields: [stepId], references: [id], onDelete: Cascade)
+  ordre           Int
+  nom             String
+  // Labels of documents expected to be attached for this sub-step.
+  documentsRequis String[]
+
+  subStepStates DossierSubStepState[]
+
+  @@index([stepId])
+  @@map("process_sub_step")
+}
+
+model DossierStepState {
+  id          String       @id @default(uuid())
+  dossierId   String
+  dossier     Dossier      @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+  // Optional reference to the source step (kept for traceability). The
+  // display data below is snapshotted so the instance stays readable even if
+  // the layout is edited after the dossier is closed.
+  stepId      String?
+  step        ProcessStep? @relation(fields: [stepId], references: [id], onDelete: SetNull)
+  ordre       Int
+  nom         String
+  dureeJours  Int          @default(0)
+  description String?
+  commentaire String?
+  valide      Boolean      @default(false)
+  valideAt    DateTime?
+  valideBy    String?
+
+  subStepStates DossierSubStepState[]
+
+  @@index([dossierId])
+  @@map("dossier_step_state")
+}
+
+model DossierSubStepState {
+  id              String           @id @default(uuid())
+  dossierId       String
+  stepStateId     String
+  stepState       DossierStepState @relation(fields: [stepStateId], references: [id], onDelete: Cascade)
+  subStepId       String?
+  subStep         ProcessSubStep?  @relation(fields: [subStepId], references: [id], onDelete: SetNull)
+  ordre           Int
+  nom             String
+  documentsRequis String[]
+  coche           Boolean          @default(false)
+  cocheAt         DateTime?
+  cocheBy         String?
+
+  documents Document[]
+
+  @@index([stepStateId])
+  @@map("dossier_sub_step_state")
+}
+
+model Tache {
+  id              String        @id @default(uuid())
+  titre           String
+  description     String?
+  priorite        TachePriorite @default(NORMALE)
+  statut          TacheStatut   @default(A_FAIRE)
+  dateEcheance    DateTime?
+  // Date the task was assigned to the agent (set when a dossier is assigned).
+  dateAssignation DateTime?
+  // Marks tasks generated automatically when a dossier is assigned, so they
+  // can be safely closed when the dossier is later unassigned.
+  auto            Boolean       @default(false)
+
+  agentId String?
+  agent   User?   @relation(fields: [agentId], references: [id], onDelete: SetNull)
+
+  dossierId String
+  dossier   Dossier @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("tache")
+}
+
+// Public testimonials / reviews left by visitors on the landing page.
+model Avis {
+  id    String  @id @default(uuid())
+  nom   String
+  role  String?
+  texte String
+  note  Int     @default(5)
+
+  // Optional link to the account that left the review (if authenticated).
+  userId String?
+  user   User?   @relation("UserAvis", fields: [userId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("avis")
+}
+
+// Editable company contact information shown on the public /contact page.
+// Stored as a single row (id = "default").
+model CompanySettings {
+  id        String   @id @default("default")
+  telephone String
+  whatsapp  String
+  email     String
+  adresse   String
+  horaires  String
+  updatedAt DateTime @updatedAt
+
+  @@map("company_settings")
+}
