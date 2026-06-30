@@ -10,6 +10,7 @@ export const metadata: Metadata = {
 }
 
 // Strips spaces and non-dialable characters to build tel:/wa.me links.
+//ok
 function digitsOnly(value: string) {
   return value.replace(/[^\d+]/g, "")
 }
