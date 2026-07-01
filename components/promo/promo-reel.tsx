@@ -13,53 +13,189 @@ import {
   Play,
   RotateCcw,
   ArrowRight,
+  Volume2,
+  VolumeX,
 } from "lucide-react"
 
 // Total runtime: 30 seconds. Each scene has a start time (ms) and duration.
 const SCENES = [
-  { id: "intro", start: 0, end: 4200 },
-  { id: "probleme", start: 4200, end: 9500 },
-  { id: "solution", start: 9500, end: 15500 },
-  { id: "process", start: 15500, end: 21000 },
-  { id: "chiffres", start: 21000, end: 26000 },
-  { id: "cta", start: 26000, end: 30000 },
+  { id: "intro", start: 0, end: 4000 },
+  { id: "probleme", start: 4000, end: 8800 },
+  { id: "solution", start: 8800, end: 13800 },
+  { id: "apercu", start: 13800, end: 19800 },
+  { id: "process", start: 19800, end: 23800 },
+  { id: "chiffres", start: 23800, end: 27000 },
+  { id: "cta", start: 27000, end: 30000 },
 ] as const
 
 const TOTAL = 30000
+
+// French voice-over line for each scene.
+const VOICE: Record<string, string> = {
+  intro: "À Kinshasa, gérez vos dossiers, sans le papier.",
+  probleme: "Files d'attente, dossiers égarés, aucune visibilité. Ça suffit.",
+  solution: "SIGS centralise vos dossiers, automatise vos processus, et sécurise vos données.",
+  apercu: "Tableau de bord, dossiers, processus et analyses : tout est réuni dans une seule plateforme.",
+  process: "Chaque étape est suivie, et vos clients scannent un QR code pour tout voir.",
+  chiffres: "Trois fois plus rapide. Cent pour cent de vos dossiers tracés.",
+  cta: "SIGS. Demandez votre démo gratuite, dès aujourd'hui.",
+}
 
 export function PromoReel() {
   const [elapsed, setElapsed] = useState(0)
   const [playing, setPlaying] = useState(false)
   const [started, setStarted] = useState(false)
+  const [muted, setMuted] = useState(false)
   const rafRef = useRef<number | null>(null)
   const startTsRef = useRef<number>(0)
+  const mutedRef = useRef(false)
+  const spokenRef = useRef<string | null>(null)
+
+  // --- Web Audio ambient bed (soft pad + gentle pulse) ---
+  const audioRef = useRef<AudioContext | null>(null)
+  const masterRef = useRef<GainNode | null>(null)
+  const pulseTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  const startAudioBed = useCallback(() => {
+    try {
+      const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+      const ctx = new Ctx()
+      audioRef.current = ctx
+      const master = ctx.createGain()
+      master.gain.value = mutedRef.current ? 0 : 0.16
+      master.connect(ctx.destination)
+      masterRef.current = master
+
+      // Warm pad: two detuned oscillators through a low-pass filter.
+      const filter = ctx.createBiquadFilter()
+      filter.type = "lowpass"
+      filter.frequency.value = 700
+      filter.connect(master)
+      const padGain = ctx.createGain()
+      padGain.gain.value = 0.5
+      padGain.connect(filter)
+      ;[110, 164.81].forEach((f, i) => {
+        const osc = ctx.createOscillator()
+        osc.type = "sine"
+        osc.frequency.value = f
+        osc.detune.value = i === 0 ? -6 : 6
+        osc.connect(padGain)
+        osc.start()
+      })
+
+      // Gentle rhythmic pulse to feel dynamic/modern.
+      pulseTimerRef.current = setInterval(() => {
+        if (!audioRef.current) return
+        const t = audioRef.current.currentTime
+        const g = audioRef.current.createGain()
+        g.gain.setValueAtTime(0.0001, t)
+        g.gain.exponentialRampToValueAtTime(0.5, t + 0.02)
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.28)
+        g.connect(master)
+        const o = audioRef.current.createOscillator()
+        o.type = "triangle"
+        o.frequency.setValueAtTime(150, t)
+        o.frequency.exponentialRampToValueAtTime(60, t + 0.25)
+        o.connect(g)
+        o.start(t)
+        o.stop(t + 0.3)
+      }, 545) // ~110 BPM
+    } catch {
+      // Audio not available — silent fallback.
+    }
+  }, [])
+
+  const stopAudioBed = useCallback(() => {
+    if (pulseTimerRef.current) clearInterval(pulseTimerRef.current)
+    pulseTimerRef.current = null
+    if (audioRef.current) {
+      audioRef.current.close().catch(() => {})
+      audioRef.current = null
+    }
+  }, [])
+
+  const speak = useCallback((text: string) => {
+    if (mutedRef.current) return
+    try {
+      const synth = window.speechSynthesis
+      if (!synth) return
+      const u = new SpeechSynthesisUtterance(text)
+      u.lang = "fr-FR"
+      u.rate = 1.06
+      u.pitch = 1
+      const fr = synth.getVoices().find((v) => v.lang?.toLowerCase().startsWith("fr"))
+      if (fr) u.voice = fr
+      synth.speak(u)
+    } catch {
+      // Speech synthesis not available.
+    }
+  }, [])
 
   const tick = useCallback((now: number) => {
     const e = now - startTsRef.current
     if (e >= TOTAL) {
       setElapsed(TOTAL)
       setPlaying(false)
+      stopAudioBed()
       return
     }
     setElapsed(e)
     rafRef.current = requestAnimationFrame(tick)
-  }, [])
+  }, [stopAudioBed])
 
   const play = useCallback(() => {
+    // Warm up voices (some browsers load them lazily).
+    try {
+      window.speechSynthesis?.getVoices()
+      window.speechSynthesis?.cancel()
+    } catch {
+      /* noop */
+    }
+    spokenRef.current = null
     setStarted(true)
     setPlaying(true)
     startTsRef.current = performance.now()
     setElapsed(0)
+    stopAudioBed()
+    startAudioBed()
     rafRef.current = requestAnimationFrame(tick)
-  }, [tick])
+  }, [tick, startAudioBed, stopAudioBed])
+
+  const toggleMute = useCallback(() => {
+    setMuted((m) => {
+      const next = !m
+      mutedRef.current = next
+      if (masterRef.current && audioRef.current) {
+        masterRef.current.gain.setTargetAtTime(next ? 0 : 0.16, audioRef.current.currentTime, 0.05)
+      }
+      if (next) window.speechSynthesis?.cancel()
+      return next
+    })
+  }, [])
 
   useEffect(() => {
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
+      stopAudioBed()
+      try {
+        window.speechSynthesis?.cancel()
+      } catch {
+        /* noop */
+      }
     }
-  }, [])
+  }, [stopAudioBed])
 
   const current = SCENES.find((s) => elapsed >= s.start && elapsed < s.end)?.id ?? "cta"
+
+  // Speak the voice-over once when a scene becomes active.
+  useEffect(() => {
+    if (!playing) return
+    if (spokenRef.current !== current && VOICE[current]) {
+      spokenRef.current = current
+      speak(VOICE[current])
+    }
+  }, [current, playing, speak])
+
   const progress = Math.min(100, (elapsed / TOTAL) * 100)
 
   return (
@@ -89,6 +225,7 @@ export function PromoReel() {
             {current === "intro" && <SceneIntro />}
             {current === "probleme" && <SceneProbleme />}
             {current === "solution" && <SceneSolution />}
+            {current === "apercu" && <SceneApercu />}
             {current === "process" && <SceneProcess />}
             {current === "chiffres" && <SceneChiffres />}
             {current === "cta" && <SceneCta replay={play} finished={elapsed >= TOTAL} />}
@@ -114,11 +251,23 @@ export function PromoReel() {
         </div>
       )}
 
-      {/* Pause hint / replay when idle */}
+      {/* Mute toggle */}
+      {started && (
+        <button
+          onClick={toggleMute}
+          aria-label={muted ? "Activer le son" : "Couper le son"}
+          className="absolute right-8 top-6 inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-2 text-sm font-medium backdrop-blur hover:bg-white/20"
+        >
+          {muted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
+          {muted ? "Son coupé" : "Son"}
+        </button>
+      )}
+
+      {/* Replay when finished */}
       {started && !playing && elapsed >= TOTAL && (
         <button
           onClick={play}
-          className="absolute right-8 top-6 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium backdrop-blur hover:bg-white/20"
+          className="absolute right-8 top-16 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium backdrop-blur hover:bg-white/20"
         >
           <RotateCcw className="size-4" /> Rejouer
         </button>
@@ -138,7 +287,8 @@ function StartCard({ onPlay }: { onPlay: () => void }) {
         </div>
       </div>
       <p className="max-w-md text-balance text-lg text-white/70">
-        Présentation animée — 30 secondes. Passez en plein écran, puis lancez pour enregistrer.
+        Présentation animée avec voix off — 30 secondes. Passez en plein écran, montez le son, puis lancez pour
+        enregistrer.
       </p>
       <button
         onClick={onPlay}
@@ -146,6 +296,7 @@ function StartCard({ onPlay }: { onPlay: () => void }) {
       >
         <Play className="size-5 fill-current" /> Lancer la vidéo
       </button>
+      <p className="text-xs text-white/40">Astuce : la voix off utilise la synthèse vocale de votre navigateur.</p>
     </div>
   )
 }
@@ -222,6 +373,70 @@ function SceneSolution() {
               <div className="text-sm text-white/60 text-pretty">{f.desc}</div>
             </div>
           </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+const SHOTS = [
+  { src: "/promo/dashboard.png", label: "Tableau de bord" },
+  { src: "/promo/dossiers.png", label: "Dossiers" },
+  { src: "/promo/process.png", label: "Processus" },
+  { src: "/promo/analytics.png", label: "Analyses" },
+  { src: "/promo/taches.png", label: "Tâches" },
+]
+
+function SceneApercu() {
+  const [idx, setIdx] = useState(0)
+  useEffect(() => {
+    const id = setInterval(() => setIdx((i) => (i + 1) % SHOTS.length), 1150)
+    return () => clearInterval(id)
+  }, [])
+  return (
+    <div className="flex w-full flex-col items-center gap-6">
+      <h2 className="animate-fade-up text-3xl font-bold tracking-tight text-balance text-center">
+        Une seule plateforme, <span className="text-[oklch(0.7_0.13_195)]">tout ce qu&apos;il vous faut.</span>
+      </h2>
+
+      {/* Browser frame */}
+      <div className="animate-fade-up w-full max-w-4xl overflow-hidden rounded-2xl border border-white/12 bg-[#0d1226] shadow-2xl">
+        <div className="flex items-center gap-2 border-b border-white/10 bg-white/[0.04] px-4 py-3">
+          <span className="size-3 rounded-full bg-[#ff5f57]" />
+          <span className="size-3 rounded-full bg-[#febc2e]" />
+          <span className="size-3 rounded-full bg-[#28c840]" />
+          <div className="ml-3 flex-1 rounded-md bg-white/[0.06] px-3 py-1 text-xs text-white/50">
+            sigs.app / {SHOTS[idx].label.toLowerCase()}
+          </div>
+        </div>
+        <div className="relative aspect-[1440/900] w-full bg-[#0a0e1f]">
+          {SHOTS.map((s, i) => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={s.src}
+              src={s.src || "/placeholder.svg"}
+              alt={`Aperçu — ${s.label}`}
+              className="absolute inset-0 h-full w-full object-cover object-top transition-opacity duration-500"
+              style={{ opacity: i === idx ? 1 : 0 }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Section chips */}
+      <div className="flex flex-wrap items-center justify-center gap-2.5">
+        {SHOTS.map((s, i) => (
+          <span
+            key={s.label}
+            className={
+              "rounded-full border px-4 py-1.5 text-sm transition " +
+              (i === idx
+                ? "border-[oklch(0.64_0.13_195)]/50 bg-[oklch(0.64_0.13_195)]/15 text-white"
+                : "border-white/10 bg-white/[0.03] text-white/55")
+            }
+          >
+            {s.label}
+          </span>
         ))}
       </div>
     </div>
