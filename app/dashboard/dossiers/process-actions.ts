@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma"
 import { requireRole } from "@/lib/session"
 import { notifyDossierCloture } from "@/lib/email"
+import { notifyClientStatutChangeWhatsApp } from "@/lib/whatsapp"
 import { revalidatePath } from "next/cache"
 
 const CLOSED_STATUTS = ["TERMINE", "ARCHIVE"]
@@ -35,7 +36,7 @@ export async function toggleSubStep(subStepStateId: string, coche: boolean) {
   const user = await requireRole(["AGENT", "MANAGER", "ADMIN"])
   const sub = await prisma.dossierSubStepState.findUnique({
     where: { id: subStepStateId },
-    include: { stepState: { include: { dossier: true } } },
+    include: { stepState: { include: { dossier: { include: { client: true } } } } },
   })
   if (!sub) throw new Error("Sous-étape introuvable.")
   const { stepState } = sub
@@ -65,6 +66,7 @@ export async function toggleSubStep(subStepStateId: string, coche: boolean) {
   if (coche && dossier.statut !== "EN_COURS") {
     await prisma.dossier.update({ where: { id: dossier.id }, data: { statut: "EN_COURS" as never } })
     await recordStatutChange(dossier.id, dossier.statut, "EN_COURS", user)
+    await notifyClientStatutChangeWhatsApp(dossier, "EN_COURS")
   }
 
   revalidatePath(`/dashboard/dossiers/${dossier.id}`)
@@ -114,6 +116,7 @@ export async function validateStep(stepStateId: string) {
       include: { client: true },
     })
     await recordStatutChange(dossier.id, dossier.statut, "TERMINE", user)
+    await notifyClientStatutChangeWhatsApp(updated, "TERMINE")
     try {
       await notifyDossierCloture(updated)
     } catch (e) {

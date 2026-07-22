@@ -1,12 +1,12 @@
 import Link from "next/link"
 import Image from "next/image"
 import { notFound } from "next/navigation"
-import { ArrowLeft, FileText, ExternalLink, Calendar, User2, Banknote, Download, QrCode } from "lucide-react"
+import { ArrowLeft, FileText, ExternalLink, Calendar, Banknote, Download, QrCode } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { PageHeader } from "@/components/dashboard/page-header"
-import { StatutBadge, PrioriteBadge } from "@/components/dashboard/badges"
+import { StatutBadge, PrioriteBadge, DossierTypeBadge, DossierTypeIconTile } from "@/components/dashboard/badges"
+import { AvatarBadge } from "@/components/dashboard/avatar-badge"
 import { StatutChanger } from "@/components/dashboard/statut-changer"
 import { StatutHistory } from "@/components/dashboard/statut-history"
 import { DocumentDialog } from "@/components/dashboard/document-dialog"
@@ -16,7 +16,7 @@ import { DeleteButton } from "@/components/dashboard/delete-button"
 import { DownloadButton } from "@/components/dashboard/download-button"
 import { DossierEditDialog } from "@/components/dashboard/dossier-edit-dialog"
 import { requireUser, isStaff } from "@/lib/session"
-import { dossierTypeLabels, tacheStatutLabels, formatUsd, formatClientName } from "@/lib/domain"
+import { tacheStatutLabels, formatUsd, formatClientName, roleLabels } from "@/lib/domain"
 import { DossierProcessInstance } from "@/components/dashboard/dossier-process-instance"
 import { getDossier, deleteDossier, getAgentsForSelect } from "../actions"
 import { getActiveProcessesForSelect } from "../../process/actions"
@@ -63,50 +63,56 @@ export default async function DossierDetailPage({
         <ArrowLeft className="size-4" /> Retour aux dossiers
       </Link>
 
-      <PageHeader
-        title={dossier.nom}
-        description={`${dossier.numero} · ${dossierTypeLabels[dossier.type]}`}
-        action={
-          <div className="flex items-center gap-2">
-            <DownloadButton
-              url={`/dashboard/dossiers/${dossier.id}/pdf`}
-              filename={`${dossier.numero}.pdf`}
-            >
-              <Download className="size-4" /> Télécharger le PDF
-            </DownloadButton>
-            <DownloadButton
-              url={`/dashboard/dossiers/${dossier.id}/qr-pdf`}
-              filename={`${dossier.numero}-qr.pdf`}
-            >
-              <QrCode className="size-4" /> PDF du code QR
-            </DownloadButton>
-            {canManage ? (
-              <DossierEditDialog
-                dossier={{
-                  id: dossier.id,
-                  nom: dossier.nom,
-                  type: dossier.type,
-                  montant: dossier.montant,
-                  notes: dossier.notes,
-                  agentId: dossier.agentId,
-                  processDefinitionId: dossier.processDefinition?.id ?? null,
-                  processName: dossier.processDefinition?.nom ?? null,
-                }}
-                agents={agents}
-                processes={processes}
-                defaultOpen={edit === "1"}
-              />
-            ) : null}
-            {isAdmin ? (
-              <DeleteButton
-                action={deleteDossier.bind(null, dossier.id)}
-                redirectTo="/dashboard/dossiers"
-                label="Supprimer le dossier"
-              />
-            ) : null}
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex items-start gap-3">
+          <DossierTypeIconTile type={dossier.type} className="size-12" />
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-balance">{dossier.nom}</h1>
+            <div className="mt-1.5 flex flex-wrap items-center gap-2">
+              <span className="text-sm text-muted-foreground">{dossier.numero}</span>
+              <DossierTypeBadge type={dossier.type} />
+            </div>
           </div>
-        }
-      />
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <DownloadButton
+            url={`/dashboard/dossiers/${dossier.id}/pdf`}
+            filename={`${dossier.numero}.pdf`}
+          >
+            <Download className="size-4" /> Télécharger le PDF
+          </DownloadButton>
+          <DownloadButton
+            url={`/dashboard/dossiers/${dossier.id}/qr-pdf`}
+            filename={`${dossier.numero}-qr.pdf`}
+          >
+            <QrCode className="size-4" /> PDF du code QR
+          </DownloadButton>
+          {canManage ? (
+            <DossierEditDialog
+              dossier={{
+                id: dossier.id,
+                nom: dossier.nom,
+                type: dossier.type,
+                montant: dossier.montant,
+                notes: dossier.notes,
+                agentId: dossier.agentId,
+                processDefinitionId: dossier.processDefinition?.id ?? null,
+                processName: dossier.processDefinition?.nom ?? null,
+              }}
+              agents={agents}
+              processes={processes}
+              defaultOpen={edit === "1"}
+            />
+          ) : null}
+          {isAdmin ? (
+            <DeleteButton
+              action={deleteDossier.bind(null, dossier.id)}
+              redirectTo="/dashboard/dossiers"
+              label="Supprimer le dossier"
+            />
+          ) : null}
+        </div>
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Info + status */}
@@ -116,12 +122,13 @@ export default async function DossierDetailPage({
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="flex items-center gap-2 text-sm">
-                <User2 className="size-4 text-muted-foreground" />
-                <Link href={`/dashboard/clients/${dossier.clientId}`} className="hover:underline">
-                  {formatClientName(dossier.client)}
-                </Link>
-              </div>
+              <Link
+                href={`/dashboard/clients/${dossier.clientId}`}
+                className="flex items-center gap-2 text-sm hover:underline"
+              >
+                <AvatarBadge name={formatClientName(dossier.client)} image={dossier.client.photo} size="size-7" />
+                {formatClientName(dossier.client)}
+              </Link>
               <div className="flex items-center gap-2 text-sm">
                 <Banknote className="size-4 text-muted-foreground" />
                 {formatUsd(dossier.montant)}
@@ -131,8 +138,15 @@ export default async function DossierDetailPage({
                 Créé le {format(dossier.createdAt, "d MMM yyyy", { locale: fr })}
               </div>
               <div className="flex items-center gap-2 text-sm">
-                <User2 className="size-4 text-muted-foreground" />
-                Agent : {dossier.agent?.name ?? "—"}
+                <AvatarBadge name={dossier.agent?.name} image={dossier.agent?.image} size="size-7" />
+                {dossier.agent ? (
+                  <span>
+                    {dossier.agent.name}{" "}
+                    <span className="text-xs text-muted-foreground">({roleLabels[dossier.agent.role]})</span>
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground">Non assigné</span>
+                )}
               </div>
             </div>
 

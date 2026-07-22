@@ -47,7 +47,10 @@ export async function getRecentDossiers() {
     where: isClient ? { client: { userId: user.id } } : {},
     orderBy: { createdAt: "desc" },
     take: 6,
-    include: { client: true },
+    include: {
+      client: true,
+      processDefinition: { select: { _count: { select: { steps: true } } } },
+    },
   })
 }
 

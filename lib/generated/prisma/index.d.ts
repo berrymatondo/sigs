@@ -93,6 +93,11 @@ export type Avis = $Result.DefaultSelection<Prisma.$AvisPayload>
  * 
  */
 export type CompanySettings = $Result.DefaultSelection<Prisma.$CompanySettingsPayload>
+/**
+ * Model SystemSettings
+ * 
+ */
+export type SystemSettings = $Result.DefaultSelection<Prisma.$SystemSettingsPayload>
 
 /**
  * Enums
@@ -468,6 +473,16 @@ export class PrismaClient<
     * ```
     */
   get companySettings(): Prisma.CompanySettingsDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.systemSettings`: Exposes CRUD operations for the **SystemSettings** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more SystemSettings
+    * const systemSettings = await prisma.systemSettings.findMany()
+    * ```
+    */
+  get systemSettings(): Prisma.SystemSettingsDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -924,7 +939,8 @@ export namespace Prisma {
     DossierSubStepState: 'DossierSubStepState',
     Tache: 'Tache',
     Avis: 'Avis',
-    CompanySettings: 'CompanySettings'
+    CompanySettings: 'CompanySettings',
+    SystemSettings: 'SystemSettings'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -943,7 +959,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "session" | "account" | "verification" | "client" | "dossier" | "dossierStatutHistory" | "document" | "processDefinition" | "processStep" | "processSubStep" | "dossierStepState" | "dossierSubStepState" | "tache" | "avis" | "companySettings"
+      modelProps: "user" | "session" | "account" | "verification" | "client" | "dossier" | "dossierStatutHistory" | "document" | "processDefinition" | "processStep" | "processSubStep" | "dossierStepState" | "dossierSubStepState" | "tache" | "avis" | "companySettings" | "systemSettings"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2131,6 +2147,80 @@ export namespace Prisma {
           }
         }
       }
+      SystemSettings: {
+        payload: Prisma.$SystemSettingsPayload<ExtArgs>
+        fields: Prisma.SystemSettingsFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.SystemSettingsFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingsPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.SystemSettingsFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingsPayload>
+          }
+          findFirst: {
+            args: Prisma.SystemSettingsFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingsPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.SystemSettingsFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingsPayload>
+          }
+          findMany: {
+            args: Prisma.SystemSettingsFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingsPayload>[]
+          }
+          create: {
+            args: Prisma.SystemSettingsCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingsPayload>
+          }
+          createMany: {
+            args: Prisma.SystemSettingsCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.SystemSettingsCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingsPayload>[]
+          }
+          delete: {
+            args: Prisma.SystemSettingsDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingsPayload>
+          }
+          update: {
+            args: Prisma.SystemSettingsUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingsPayload>
+          }
+          deleteMany: {
+            args: Prisma.SystemSettingsDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.SystemSettingsUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.SystemSettingsUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingsPayload>[]
+          }
+          upsert: {
+            args: Prisma.SystemSettingsUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingsPayload>
+          }
+          aggregate: {
+            args: Prisma.SystemSettingsAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateSystemSettings>
+          }
+          groupBy: {
+            args: Prisma.SystemSettingsGroupByArgs<ExtArgs>
+            result: $Utils.Optional<SystemSettingsGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.SystemSettingsCountArgs<ExtArgs>
+            result: $Utils.Optional<SystemSettingsCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -2243,6 +2333,7 @@ export namespace Prisma {
     tache?: TacheOmit
     avis?: AvisOmit
     companySettings?: CompanySettingsOmit
+    systemSettings?: SystemSettingsOmit
   }
 
   /* Types for Logging */
@@ -4023,6 +4114,7 @@ export namespace Prisma {
     userId: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    otpVerified: boolean | null
   }
 
   export type SessionMaxAggregateOutputType = {
@@ -4034,6 +4126,7 @@ export namespace Prisma {
     userId: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    otpVerified: boolean | null
   }
 
   export type SessionCountAggregateOutputType = {
@@ -4045,6 +4138,7 @@ export namespace Prisma {
     userId: number
     createdAt: number
     updatedAt: number
+    otpVerified: number
     _all: number
   }
 
@@ -4058,6 +4152,7 @@ export namespace Prisma {
     userId?: true
     createdAt?: true
     updatedAt?: true
+    otpVerified?: true
   }
 
   export type SessionMaxAggregateInputType = {
@@ -4069,6 +4164,7 @@ export namespace Prisma {
     userId?: true
     createdAt?: true
     updatedAt?: true
+    otpVerified?: true
   }
 
   export type SessionCountAggregateInputType = {
@@ -4080,6 +4176,7 @@ export namespace Prisma {
     userId?: true
     createdAt?: true
     updatedAt?: true
+    otpVerified?: true
     _all?: true
   }
 
@@ -4164,6 +4261,7 @@ export namespace Prisma {
     userId: string
     createdAt: Date
     updatedAt: Date
+    otpVerified: boolean
     _count: SessionCountAggregateOutputType | null
     _min: SessionMinAggregateOutputType | null
     _max: SessionMaxAggregateOutputType | null
@@ -4192,6 +4290,7 @@ export namespace Prisma {
     userId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    otpVerified?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["session"]>
 
@@ -4204,6 +4303,7 @@ export namespace Prisma {
     userId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    otpVerified?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["session"]>
 
@@ -4216,6 +4316,7 @@ export namespace Prisma {
     userId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    otpVerified?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["session"]>
 
@@ -4228,9 +4329,10 @@ export namespace Prisma {
     userId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    otpVerified?: boolean
   }
 
-  export type SessionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "expiresAt" | "token" | "ipAddress" | "userAgent" | "userId" | "createdAt" | "updatedAt", ExtArgs["result"]["session"]>
+  export type SessionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "expiresAt" | "token" | "ipAddress" | "userAgent" | "userId" | "createdAt" | "updatedAt" | "otpVerified", ExtArgs["result"]["session"]>
   export type SessionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
   }
@@ -4255,6 +4357,7 @@ export namespace Prisma {
       userId: string
       createdAt: Date
       updatedAt: Date
+      otpVerified: boolean
     }, ExtArgs["result"]["session"]>
     composites: {}
   }
@@ -4687,6 +4790,7 @@ export namespace Prisma {
     readonly userId: FieldRef<"Session", 'String'>
     readonly createdAt: FieldRef<"Session", 'DateTime'>
     readonly updatedAt: FieldRef<"Session", 'DateTime'>
+    readonly otpVerified: FieldRef<"Session", 'Boolean'>
   }
     
 
@@ -21521,6 +21625,975 @@ export namespace Prisma {
 
 
   /**
+   * Model SystemSettings
+   */
+
+  export type AggregateSystemSettings = {
+    _count: SystemSettingsCountAggregateOutputType | null
+    _min: SystemSettingsMinAggregateOutputType | null
+    _max: SystemSettingsMaxAggregateOutputType | null
+  }
+
+  export type SystemSettingsMinAggregateOutputType = {
+    id: string | null
+    otpLoginEnabled: boolean | null
+    updatedAt: Date | null
+  }
+
+  export type SystemSettingsMaxAggregateOutputType = {
+    id: string | null
+    otpLoginEnabled: boolean | null
+    updatedAt: Date | null
+  }
+
+  export type SystemSettingsCountAggregateOutputType = {
+    id: number
+    otpLoginEnabled: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type SystemSettingsMinAggregateInputType = {
+    id?: true
+    otpLoginEnabled?: true
+    updatedAt?: true
+  }
+
+  export type SystemSettingsMaxAggregateInputType = {
+    id?: true
+    otpLoginEnabled?: true
+    updatedAt?: true
+  }
+
+  export type SystemSettingsCountAggregateInputType = {
+    id?: true
+    otpLoginEnabled?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type SystemSettingsAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SystemSettings to aggregate.
+     */
+    where?: SystemSettingsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SystemSettings to fetch.
+     */
+    orderBy?: SystemSettingsOrderByWithRelationInput | SystemSettingsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: SystemSettingsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SystemSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SystemSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned SystemSettings
+    **/
+    _count?: true | SystemSettingsCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: SystemSettingsMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: SystemSettingsMaxAggregateInputType
+  }
+
+  export type GetSystemSettingsAggregateType<T extends SystemSettingsAggregateArgs> = {
+        [P in keyof T & keyof AggregateSystemSettings]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateSystemSettings[P]>
+      : GetScalarType<T[P], AggregateSystemSettings[P]>
+  }
+
+
+
+
+  export type SystemSettingsGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SystemSettingsWhereInput
+    orderBy?: SystemSettingsOrderByWithAggregationInput | SystemSettingsOrderByWithAggregationInput[]
+    by: SystemSettingsScalarFieldEnum[] | SystemSettingsScalarFieldEnum
+    having?: SystemSettingsScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: SystemSettingsCountAggregateInputType | true
+    _min?: SystemSettingsMinAggregateInputType
+    _max?: SystemSettingsMaxAggregateInputType
+  }
+
+  export type SystemSettingsGroupByOutputType = {
+    id: string
+    otpLoginEnabled: boolean
+    updatedAt: Date
+    _count: SystemSettingsCountAggregateOutputType | null
+    _min: SystemSettingsMinAggregateOutputType | null
+    _max: SystemSettingsMaxAggregateOutputType | null
+  }
+
+  type GetSystemSettingsGroupByPayload<T extends SystemSettingsGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<SystemSettingsGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof SystemSettingsGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], SystemSettingsGroupByOutputType[P]>
+            : GetScalarType<T[P], SystemSettingsGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type SystemSettingsSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    otpLoginEnabled?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["systemSettings"]>
+
+  export type SystemSettingsSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    otpLoginEnabled?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["systemSettings"]>
+
+  export type SystemSettingsSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    otpLoginEnabled?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["systemSettings"]>
+
+  export type SystemSettingsSelectScalar = {
+    id?: boolean
+    otpLoginEnabled?: boolean
+    updatedAt?: boolean
+  }
+
+  export type SystemSettingsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "otpLoginEnabled" | "updatedAt", ExtArgs["result"]["systemSettings"]>
+
+  export type $SystemSettingsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "SystemSettings"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      otpLoginEnabled: boolean
+      updatedAt: Date
+    }, ExtArgs["result"]["systemSettings"]>
+    composites: {}
+  }
+
+  type SystemSettingsGetPayload<S extends boolean | null | undefined | SystemSettingsDefaultArgs> = $Result.GetResult<Prisma.$SystemSettingsPayload, S>
+
+  type SystemSettingsCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<SystemSettingsFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: SystemSettingsCountAggregateInputType | true
+    }
+
+  export interface SystemSettingsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['SystemSettings'], meta: { name: 'SystemSettings' } }
+    /**
+     * Find zero or one SystemSettings that matches the filter.
+     * @param {SystemSettingsFindUniqueArgs} args - Arguments to find a SystemSettings
+     * @example
+     * // Get one SystemSettings
+     * const systemSettings = await prisma.systemSettings.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends SystemSettingsFindUniqueArgs>(args: SelectSubset<T, SystemSettingsFindUniqueArgs<ExtArgs>>): Prisma__SystemSettingsClient<$Result.GetResult<Prisma.$SystemSettingsPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one SystemSettings that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {SystemSettingsFindUniqueOrThrowArgs} args - Arguments to find a SystemSettings
+     * @example
+     * // Get one SystemSettings
+     * const systemSettings = await prisma.systemSettings.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends SystemSettingsFindUniqueOrThrowArgs>(args: SelectSubset<T, SystemSettingsFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SystemSettingsClient<$Result.GetResult<Prisma.$SystemSettingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SystemSettings that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SystemSettingsFindFirstArgs} args - Arguments to find a SystemSettings
+     * @example
+     * // Get one SystemSettings
+     * const systemSettings = await prisma.systemSettings.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends SystemSettingsFindFirstArgs>(args?: SelectSubset<T, SystemSettingsFindFirstArgs<ExtArgs>>): Prisma__SystemSettingsClient<$Result.GetResult<Prisma.$SystemSettingsPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SystemSettings that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SystemSettingsFindFirstOrThrowArgs} args - Arguments to find a SystemSettings
+     * @example
+     * // Get one SystemSettings
+     * const systemSettings = await prisma.systemSettings.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends SystemSettingsFindFirstOrThrowArgs>(args?: SelectSubset<T, SystemSettingsFindFirstOrThrowArgs<ExtArgs>>): Prisma__SystemSettingsClient<$Result.GetResult<Prisma.$SystemSettingsPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more SystemSettings that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SystemSettingsFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all SystemSettings
+     * const systemSettings = await prisma.systemSettings.findMany()
+     * 
+     * // Get first 10 SystemSettings
+     * const systemSettings = await prisma.systemSettings.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const systemSettingsWithIdOnly = await prisma.systemSettings.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends SystemSettingsFindManyArgs>(args?: SelectSubset<T, SystemSettingsFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SystemSettingsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a SystemSettings.
+     * @param {SystemSettingsCreateArgs} args - Arguments to create a SystemSettings.
+     * @example
+     * // Create one SystemSettings
+     * const SystemSettings = await prisma.systemSettings.create({
+     *   data: {
+     *     // ... data to create a SystemSettings
+     *   }
+     * })
+     * 
+     */
+    create<T extends SystemSettingsCreateArgs>(args: SelectSubset<T, SystemSettingsCreateArgs<ExtArgs>>): Prisma__SystemSettingsClient<$Result.GetResult<Prisma.$SystemSettingsPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many SystemSettings.
+     * @param {SystemSettingsCreateManyArgs} args - Arguments to create many SystemSettings.
+     * @example
+     * // Create many SystemSettings
+     * const systemSettings = await prisma.systemSettings.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends SystemSettingsCreateManyArgs>(args?: SelectSubset<T, SystemSettingsCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many SystemSettings and returns the data saved in the database.
+     * @param {SystemSettingsCreateManyAndReturnArgs} args - Arguments to create many SystemSettings.
+     * @example
+     * // Create many SystemSettings
+     * const systemSettings = await prisma.systemSettings.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many SystemSettings and only return the `id`
+     * const systemSettingsWithIdOnly = await prisma.systemSettings.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends SystemSettingsCreateManyAndReturnArgs>(args?: SelectSubset<T, SystemSettingsCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SystemSettingsPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a SystemSettings.
+     * @param {SystemSettingsDeleteArgs} args - Arguments to delete one SystemSettings.
+     * @example
+     * // Delete one SystemSettings
+     * const SystemSettings = await prisma.systemSettings.delete({
+     *   where: {
+     *     // ... filter to delete one SystemSettings
+     *   }
+     * })
+     * 
+     */
+    delete<T extends SystemSettingsDeleteArgs>(args: SelectSubset<T, SystemSettingsDeleteArgs<ExtArgs>>): Prisma__SystemSettingsClient<$Result.GetResult<Prisma.$SystemSettingsPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one SystemSettings.
+     * @param {SystemSettingsUpdateArgs} args - Arguments to update one SystemSettings.
+     * @example
+     * // Update one SystemSettings
+     * const systemSettings = await prisma.systemSettings.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends SystemSettingsUpdateArgs>(args: SelectSubset<T, SystemSettingsUpdateArgs<ExtArgs>>): Prisma__SystemSettingsClient<$Result.GetResult<Prisma.$SystemSettingsPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more SystemSettings.
+     * @param {SystemSettingsDeleteManyArgs} args - Arguments to filter SystemSettings to delete.
+     * @example
+     * // Delete a few SystemSettings
+     * const { count } = await prisma.systemSettings.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends SystemSettingsDeleteManyArgs>(args?: SelectSubset<T, SystemSettingsDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SystemSettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SystemSettingsUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many SystemSettings
+     * const systemSettings = await prisma.systemSettings.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends SystemSettingsUpdateManyArgs>(args: SelectSubset<T, SystemSettingsUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SystemSettings and returns the data updated in the database.
+     * @param {SystemSettingsUpdateManyAndReturnArgs} args - Arguments to update many SystemSettings.
+     * @example
+     * // Update many SystemSettings
+     * const systemSettings = await prisma.systemSettings.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more SystemSettings and only return the `id`
+     * const systemSettingsWithIdOnly = await prisma.systemSettings.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends SystemSettingsUpdateManyAndReturnArgs>(args: SelectSubset<T, SystemSettingsUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SystemSettingsPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one SystemSettings.
+     * @param {SystemSettingsUpsertArgs} args - Arguments to update or create a SystemSettings.
+     * @example
+     * // Update or create a SystemSettings
+     * const systemSettings = await prisma.systemSettings.upsert({
+     *   create: {
+     *     // ... data to create a SystemSettings
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the SystemSettings we want to update
+     *   }
+     * })
+     */
+    upsert<T extends SystemSettingsUpsertArgs>(args: SelectSubset<T, SystemSettingsUpsertArgs<ExtArgs>>): Prisma__SystemSettingsClient<$Result.GetResult<Prisma.$SystemSettingsPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of SystemSettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SystemSettingsCountArgs} args - Arguments to filter SystemSettings to count.
+     * @example
+     * // Count the number of SystemSettings
+     * const count = await prisma.systemSettings.count({
+     *   where: {
+     *     // ... the filter for the SystemSettings we want to count
+     *   }
+     * })
+    **/
+    count<T extends SystemSettingsCountArgs>(
+      args?: Subset<T, SystemSettingsCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], SystemSettingsCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a SystemSettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SystemSettingsAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends SystemSettingsAggregateArgs>(args: Subset<T, SystemSettingsAggregateArgs>): Prisma.PrismaPromise<GetSystemSettingsAggregateType<T>>
+
+    /**
+     * Group by SystemSettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SystemSettingsGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends SystemSettingsGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: SystemSettingsGroupByArgs['orderBy'] }
+        : { orderBy?: SystemSettingsGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, SystemSettingsGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSystemSettingsGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the SystemSettings model
+   */
+  readonly fields: SystemSettingsFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for SystemSettings.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__SystemSettingsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the SystemSettings model
+   */
+  interface SystemSettingsFieldRefs {
+    readonly id: FieldRef<"SystemSettings", 'String'>
+    readonly otpLoginEnabled: FieldRef<"SystemSettings", 'Boolean'>
+    readonly updatedAt: FieldRef<"SystemSettings", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * SystemSettings findUnique
+   */
+  export type SystemSettingsFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSettings
+     */
+    select?: SystemSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSettings
+     */
+    omit?: SystemSettingsOmit<ExtArgs> | null
+    /**
+     * Filter, which SystemSettings to fetch.
+     */
+    where: SystemSettingsWhereUniqueInput
+  }
+
+  /**
+   * SystemSettings findUniqueOrThrow
+   */
+  export type SystemSettingsFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSettings
+     */
+    select?: SystemSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSettings
+     */
+    omit?: SystemSettingsOmit<ExtArgs> | null
+    /**
+     * Filter, which SystemSettings to fetch.
+     */
+    where: SystemSettingsWhereUniqueInput
+  }
+
+  /**
+   * SystemSettings findFirst
+   */
+  export type SystemSettingsFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSettings
+     */
+    select?: SystemSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSettings
+     */
+    omit?: SystemSettingsOmit<ExtArgs> | null
+    /**
+     * Filter, which SystemSettings to fetch.
+     */
+    where?: SystemSettingsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SystemSettings to fetch.
+     */
+    orderBy?: SystemSettingsOrderByWithRelationInput | SystemSettingsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SystemSettings.
+     */
+    cursor?: SystemSettingsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SystemSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SystemSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SystemSettings.
+     */
+    distinct?: SystemSettingsScalarFieldEnum | SystemSettingsScalarFieldEnum[]
+  }
+
+  /**
+   * SystemSettings findFirstOrThrow
+   */
+  export type SystemSettingsFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSettings
+     */
+    select?: SystemSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSettings
+     */
+    omit?: SystemSettingsOmit<ExtArgs> | null
+    /**
+     * Filter, which SystemSettings to fetch.
+     */
+    where?: SystemSettingsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SystemSettings to fetch.
+     */
+    orderBy?: SystemSettingsOrderByWithRelationInput | SystemSettingsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SystemSettings.
+     */
+    cursor?: SystemSettingsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SystemSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SystemSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SystemSettings.
+     */
+    distinct?: SystemSettingsScalarFieldEnum | SystemSettingsScalarFieldEnum[]
+  }
+
+  /**
+   * SystemSettings findMany
+   */
+  export type SystemSettingsFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSettings
+     */
+    select?: SystemSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSettings
+     */
+    omit?: SystemSettingsOmit<ExtArgs> | null
+    /**
+     * Filter, which SystemSettings to fetch.
+     */
+    where?: SystemSettingsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SystemSettings to fetch.
+     */
+    orderBy?: SystemSettingsOrderByWithRelationInput | SystemSettingsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing SystemSettings.
+     */
+    cursor?: SystemSettingsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SystemSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SystemSettings.
+     */
+    skip?: number
+    distinct?: SystemSettingsScalarFieldEnum | SystemSettingsScalarFieldEnum[]
+  }
+
+  /**
+   * SystemSettings create
+   */
+  export type SystemSettingsCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSettings
+     */
+    select?: SystemSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSettings
+     */
+    omit?: SystemSettingsOmit<ExtArgs> | null
+    /**
+     * The data needed to create a SystemSettings.
+     */
+    data: XOR<SystemSettingsCreateInput, SystemSettingsUncheckedCreateInput>
+  }
+
+  /**
+   * SystemSettings createMany
+   */
+  export type SystemSettingsCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many SystemSettings.
+     */
+    data: SystemSettingsCreateManyInput | SystemSettingsCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * SystemSettings createManyAndReturn
+   */
+  export type SystemSettingsCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSettings
+     */
+    select?: SystemSettingsSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSettings
+     */
+    omit?: SystemSettingsOmit<ExtArgs> | null
+    /**
+     * The data used to create many SystemSettings.
+     */
+    data: SystemSettingsCreateManyInput | SystemSettingsCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * SystemSettings update
+   */
+  export type SystemSettingsUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSettings
+     */
+    select?: SystemSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSettings
+     */
+    omit?: SystemSettingsOmit<ExtArgs> | null
+    /**
+     * The data needed to update a SystemSettings.
+     */
+    data: XOR<SystemSettingsUpdateInput, SystemSettingsUncheckedUpdateInput>
+    /**
+     * Choose, which SystemSettings to update.
+     */
+    where: SystemSettingsWhereUniqueInput
+  }
+
+  /**
+   * SystemSettings updateMany
+   */
+  export type SystemSettingsUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update SystemSettings.
+     */
+    data: XOR<SystemSettingsUpdateManyMutationInput, SystemSettingsUncheckedUpdateManyInput>
+    /**
+     * Filter which SystemSettings to update
+     */
+    where?: SystemSettingsWhereInput
+    /**
+     * Limit how many SystemSettings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * SystemSettings updateManyAndReturn
+   */
+  export type SystemSettingsUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSettings
+     */
+    select?: SystemSettingsSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSettings
+     */
+    omit?: SystemSettingsOmit<ExtArgs> | null
+    /**
+     * The data used to update SystemSettings.
+     */
+    data: XOR<SystemSettingsUpdateManyMutationInput, SystemSettingsUncheckedUpdateManyInput>
+    /**
+     * Filter which SystemSettings to update
+     */
+    where?: SystemSettingsWhereInput
+    /**
+     * Limit how many SystemSettings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * SystemSettings upsert
+   */
+  export type SystemSettingsUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSettings
+     */
+    select?: SystemSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSettings
+     */
+    omit?: SystemSettingsOmit<ExtArgs> | null
+    /**
+     * The filter to search for the SystemSettings to update in case it exists.
+     */
+    where: SystemSettingsWhereUniqueInput
+    /**
+     * In case the SystemSettings found by the `where` argument doesn't exist, create a new SystemSettings with this data.
+     */
+    create: XOR<SystemSettingsCreateInput, SystemSettingsUncheckedCreateInput>
+    /**
+     * In case the SystemSettings was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<SystemSettingsUpdateInput, SystemSettingsUncheckedUpdateInput>
+  }
+
+  /**
+   * SystemSettings delete
+   */
+  export type SystemSettingsDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSettings
+     */
+    select?: SystemSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSettings
+     */
+    omit?: SystemSettingsOmit<ExtArgs> | null
+    /**
+     * Filter which SystemSettings to delete.
+     */
+    where: SystemSettingsWhereUniqueInput
+  }
+
+  /**
+   * SystemSettings deleteMany
+   */
+  export type SystemSettingsDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SystemSettings to delete
+     */
+    where?: SystemSettingsWhereInput
+    /**
+     * Limit how many SystemSettings to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * SystemSettings without action
+   */
+  export type SystemSettingsDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSettings
+     */
+    select?: SystemSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSettings
+     */
+    omit?: SystemSettingsOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -21558,7 +22631,8 @@ export namespace Prisma {
     userAgent: 'userAgent',
     userId: 'userId',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    otpVerified: 'otpVerified'
   };
 
   export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
@@ -21777,6 +22851,15 @@ export namespace Prisma {
   };
 
   export type CompanySettingsScalarFieldEnum = (typeof CompanySettingsScalarFieldEnum)[keyof typeof CompanySettingsScalarFieldEnum]
+
+
+  export const SystemSettingsScalarFieldEnum: {
+    id: 'id',
+    otpLoginEnabled: 'otpLoginEnabled',
+    updatedAt: 'updatedAt'
+  };
+
+  export type SystemSettingsScalarFieldEnum = (typeof SystemSettingsScalarFieldEnum)[keyof typeof SystemSettingsScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -22071,6 +23154,7 @@ export namespace Prisma {
     userId?: StringFilter<"Session"> | string
     createdAt?: DateTimeFilter<"Session"> | Date | string
     updatedAt?: DateTimeFilter<"Session"> | Date | string
+    otpVerified?: BoolFilter<"Session"> | boolean
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
 
@@ -22083,6 +23167,7 @@ export namespace Prisma {
     userId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    otpVerified?: SortOrder
     user?: UserOrderByWithRelationInput
   }
 
@@ -22098,6 +23183,7 @@ export namespace Prisma {
     userId?: StringFilter<"Session"> | string
     createdAt?: DateTimeFilter<"Session"> | Date | string
     updatedAt?: DateTimeFilter<"Session"> | Date | string
+    otpVerified?: BoolFilter<"Session"> | boolean
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id" | "token">
 
@@ -22110,6 +23196,7 @@ export namespace Prisma {
     userId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    otpVerified?: SortOrder
     _count?: SessionCountOrderByAggregateInput
     _max?: SessionMaxOrderByAggregateInput
     _min?: SessionMinOrderByAggregateInput
@@ -22127,6 +23214,7 @@ export namespace Prisma {
     userId?: StringWithAggregatesFilter<"Session"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Session"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Session"> | Date | string
+    otpVerified?: BoolWithAggregatesFilter<"Session"> | boolean
   }
 
   export type AccountWhereInput = {
@@ -23277,6 +24365,48 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"CompanySettings"> | Date | string
   }
 
+  export type SystemSettingsWhereInput = {
+    AND?: SystemSettingsWhereInput | SystemSettingsWhereInput[]
+    OR?: SystemSettingsWhereInput[]
+    NOT?: SystemSettingsWhereInput | SystemSettingsWhereInput[]
+    id?: StringFilter<"SystemSettings"> | string
+    otpLoginEnabled?: BoolFilter<"SystemSettings"> | boolean
+    updatedAt?: DateTimeFilter<"SystemSettings"> | Date | string
+  }
+
+  export type SystemSettingsOrderByWithRelationInput = {
+    id?: SortOrder
+    otpLoginEnabled?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SystemSettingsWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: SystemSettingsWhereInput | SystemSettingsWhereInput[]
+    OR?: SystemSettingsWhereInput[]
+    NOT?: SystemSettingsWhereInput | SystemSettingsWhereInput[]
+    otpLoginEnabled?: BoolFilter<"SystemSettings"> | boolean
+    updatedAt?: DateTimeFilter<"SystemSettings"> | Date | string
+  }, "id">
+
+  export type SystemSettingsOrderByWithAggregationInput = {
+    id?: SortOrder
+    otpLoginEnabled?: SortOrder
+    updatedAt?: SortOrder
+    _count?: SystemSettingsCountOrderByAggregateInput
+    _max?: SystemSettingsMaxOrderByAggregateInput
+    _min?: SystemSettingsMinOrderByAggregateInput
+  }
+
+  export type SystemSettingsScalarWhereWithAggregatesInput = {
+    AND?: SystemSettingsScalarWhereWithAggregatesInput | SystemSettingsScalarWhereWithAggregatesInput[]
+    OR?: SystemSettingsScalarWhereWithAggregatesInput[]
+    NOT?: SystemSettingsScalarWhereWithAggregatesInput | SystemSettingsScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"SystemSettings"> | string
+    otpLoginEnabled?: BoolWithAggregatesFilter<"SystemSettings"> | boolean
+    updatedAt?: DateTimeWithAggregatesFilter<"SystemSettings"> | Date | string
+  }
+
   export type UserCreateInput = {
     id: string
     name: string
@@ -23408,6 +24538,7 @@ export namespace Prisma {
     userAgent?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    otpVerified?: boolean
     user: UserCreateNestedOneWithoutSessionsInput
   }
 
@@ -23420,6 +24551,7 @@ export namespace Prisma {
     userId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    otpVerified?: boolean
   }
 
   export type SessionUpdateInput = {
@@ -23430,6 +24562,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    otpVerified?: BoolFieldUpdateOperationsInput | boolean
     user?: UserUpdateOneRequiredWithoutSessionsNestedInput
   }
 
@@ -23442,6 +24575,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    otpVerified?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type SessionCreateManyInput = {
@@ -23453,6 +24587,7 @@ export namespace Prisma {
     userId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    otpVerified?: boolean
   }
 
   export type SessionUpdateManyMutationInput = {
@@ -23463,6 +24598,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    otpVerified?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type SessionUncheckedUpdateManyInput = {
@@ -23474,6 +24610,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    otpVerified?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type AccountCreateInput = {
@@ -24719,6 +25856,48 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type SystemSettingsCreateInput = {
+    id?: string
+    otpLoginEnabled?: boolean
+    updatedAt?: Date | string
+  }
+
+  export type SystemSettingsUncheckedCreateInput = {
+    id?: string
+    otpLoginEnabled?: boolean
+    updatedAt?: Date | string
+  }
+
+  export type SystemSettingsUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    otpLoginEnabled?: BoolFieldUpdateOperationsInput | boolean
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SystemSettingsUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    otpLoginEnabled?: BoolFieldUpdateOperationsInput | boolean
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SystemSettingsCreateManyInput = {
+    id?: string
+    otpLoginEnabled?: boolean
+    updatedAt?: Date | string
+  }
+
+  export type SystemSettingsUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    otpLoginEnabled?: BoolFieldUpdateOperationsInput | boolean
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SystemSettingsUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    otpLoginEnabled?: BoolFieldUpdateOperationsInput | boolean
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -24963,6 +26142,7 @@ export namespace Prisma {
     userId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    otpVerified?: SortOrder
   }
 
   export type SessionMaxOrderByAggregateInput = {
@@ -24974,6 +26154,7 @@ export namespace Prisma {
     userId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    otpVerified?: SortOrder
   }
 
   export type SessionMinOrderByAggregateInput = {
@@ -24985,6 +26166,7 @@ export namespace Prisma {
     userId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    otpVerified?: SortOrder
   }
 
   export type DateTimeNullableFilter<$PrismaModel = never> = {
@@ -25865,6 +27047,24 @@ export namespace Prisma {
     email?: SortOrder
     adresse?: SortOrder
     horaires?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SystemSettingsCountOrderByAggregateInput = {
+    id?: SortOrder
+    otpLoginEnabled?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SystemSettingsMaxOrderByAggregateInput = {
+    id?: SortOrder
+    otpLoginEnabled?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SystemSettingsMinOrderByAggregateInput = {
+    id?: SortOrder
+    otpLoginEnabled?: SortOrder
     updatedAt?: SortOrder
   }
 
@@ -27457,6 +28657,7 @@ export namespace Prisma {
     userAgent?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    otpVerified?: boolean
   }
 
   export type SessionUncheckedCreateWithoutUserInput = {
@@ -27467,6 +28668,7 @@ export namespace Prisma {
     userAgent?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    otpVerified?: boolean
   }
 
   export type SessionCreateOrConnectWithoutUserInput = {
@@ -27774,6 +28976,7 @@ export namespace Prisma {
     userId?: StringFilter<"Session"> | string
     createdAt?: DateTimeFilter<"Session"> | Date | string
     updatedAt?: DateTimeFilter<"Session"> | Date | string
+    otpVerified?: BoolFilter<"Session"> | boolean
   }
 
   export type AccountUpsertWithWhereUniqueWithoutUserInput = {
@@ -30526,6 +31729,7 @@ export namespace Prisma {
     userAgent?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    otpVerified?: boolean
   }
 
   export type AccountCreateManyUserInput = {
@@ -30616,6 +31820,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    otpVerified?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type SessionUncheckedUpdateWithoutUserInput = {
@@ -30626,6 +31831,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    otpVerified?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type SessionUncheckedUpdateManyWithoutUserInput = {
@@ -30636,6 +31842,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    otpVerified?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type AccountUpdateWithoutUserInput = {

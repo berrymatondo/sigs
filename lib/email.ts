@@ -440,6 +440,52 @@ export async function sendContactEmails(params: {
 }
 
 /**
+ * Sends a one-time login code to a staff member finishing a password sign-in
+ * while the OTP login setting is enabled. Returns true when dispatched.
+ */
+export async function sendLoginOtpEmail(params: {
+  name?: string | null
+  email: string
+  code: string
+}): Promise<boolean> {
+  const resend = getResend()
+  if (!resend) {
+    // Surface the code in the logs when email is not configured so the flow
+    // remains testable in development.
+    console.log("[v0] Code de connexion (Resend non configuré):", params.code, "pour", params.email)
+    return false
+  }
+
+  const greeting = params.name ? `Bonjour ${params.name},` : "Bonjour,"
+  const html = `
+  <div style="font-family: Arial, Helvetica, sans-serif; max-width: 560px; margin: 0 auto; color: #1f2937;">
+    <h2 style="margin: 0 0 8px; font-size: 18px;">Votre code de connexion</h2>
+    <p style="margin: 0 0 16px; font-size: 14px; color: #4b5563;">
+      ${greeting} voici le code à saisir pour terminer votre connexion à SIGS&nbsp;:
+    </p>
+    <p style="margin: 0 0 16px; font-size: 32px; font-weight: 700; letter-spacing: 8px; text-align: center; color: #1f2937;">
+      ${params.code}
+    </p>
+    <p style="margin: 0; font-size: 12px; color: #9ca3af;">
+      Ce code expire dans 10 minutes. Si vous n'êtes pas à l'origine de cette connexion, ignorez cet email et modifiez votre mot de passe.
+    </p>
+  </div>`
+
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: params.email,
+      subject: "Votre code de connexion SIGS",
+      html,
+    })
+    return true
+  } catch (error) {
+    console.log("[v0] Échec de l'envoi du code de connexion:", (error as Error).message)
+    return false
+  }
+}
+
+/**
  * Notify administrators that a new dossier has been created.
  */
 export async function notifyDossierCreated(dossier: DossierForEmail) {

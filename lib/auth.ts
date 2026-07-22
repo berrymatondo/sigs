@@ -2,6 +2,10 @@ import { betterAuth } from "better-auth"
 import { prismaAdapter } from "better-auth/adapters/prisma"
 import { prisma } from "@/lib/prisma"
 import { sendPasswordReset } from "@/lib/email"
+import { generateAndSendLoginOtp } from "@/lib/otp"
+import { getSystemSettings } from "@/lib/system-settings"
+
+const STAFF_ROLES = ["AGENT", "MANAGER", "ADMIN"]
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -41,6 +45,44 @@ export const auth = betterAuth({
       },
     },
   },
+  session: {
+    expiresIn: 60 * 60 * 24 * 7,
+    updateAge: 60 * 60 * 24,
+    additionalFields: {
+      // False right after creation means "must confirm an emailed OTP before
+      // this session is trusted" — set by the databaseHooks below for staff
+      // sign-ins while the OTP login setting is on. lib/session.ts reads this
+      // to gate dashboard access.
+      otpVerified: {
+        type: "boolean",
+        required: false,
+        defaultValue: true,
+        input: false,
+      },
+    },
+  },
+  databaseHooks: {
+    session: {
+      create: {
+        after: async (session) => {
+          const user = await prisma.user.findUnique({
+            where: { id: session.userId },
+            select: { role: true, email: true, name: true },
+          })
+          if (!user || !STAFF_ROLES.includes(user.role)) return
+          const settings = await getSystemSettings()
+          if (!settings.otpLoginEnabled) return
+          await prisma.session.update({ where: { id: session.id }, data: { otpVerified: false } })
+          await generateAndSendLoginOtp({
+            sessionId: session.id,
+            userId: session.userId,
+            email: user.email,
+            name: user.name,
+          })
+        },
+      },
+    },
+  },
   trustedOrigins: [
     ...(process.env.V0_RUNTIME_URL ? [process.env.V0_RUNTIME_URL] : []),
     ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
@@ -53,23 +95,16 @@ export const auth = betterAuth({
     "https://*.vercel.app",
     "http://localhost:3000",
   ],
-  session: {
-    expiresIn: 60 * 60 * 24 * 7,
-    updateAge: 60 * 60 * 24,
-  },
-  // The app runs inside a cross-site iframe (v0 preview, Vercel deployment
-  // preview). Browsers only send the session cookie back in that context when
-  // it is SameSite=None; Secure, AND modern browsers (Chrome) block third-party
-  // cookies in iframes unless they carry the Partitioned attribute (CHIPS).
-  // Without `partitioned`, the cookie is dropped and the user is bounced back to
-  // the sign-in page after a successful login.
-  advanced: {
-    defaultCookieAttributes: {
-      sameSite: "none" as const,
-      secure: true,
-      partitioned: true,
-    },
-  },
+  // SameSite=None + Partitioned was previously forced here to keep the
+  // session cookie alive inside the v0.dev preview iframe. But `VERCEL=1` (the
+  // only reliable way to detect "really running on Vercel") is set for every
+  // Vercel environment, preview iframe or not, so that override also applied
+  // to normal top-level visits on the real domain — where Safari/WebKit
+  // doesn't persist a SameSite=None; Secure cookie for a plain (non-iframe)
+  // navigation. Users saw "Connexion réussie" and were bounced straight back
+  // to /sign-in. The default (Lax) cookie works everywhere sign-in actually
+  // matters, so we no longer override it; the v0 preview iframe is a
+  // dev-tooling concern, not a real user path.
 })
 
 export type AppRole = "VISITEUR" | "AGENT" | "MANAGER" | "ADMIN"

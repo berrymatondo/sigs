@@ -46,15 +46,20 @@ model User {
 }
 
 model Session {
-  id        String   @id
-  expiresAt DateTime
-  token     String   @unique
-  ipAddress String?
-  userAgent String?
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id
+  expiresAt   DateTime
+  token       String   @unique
+  ipAddress   String?
+  userAgent   String?
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  // True once the login OTP has been verified for this session (or when OTP
+  // login wasn't required for it in the first place). Staff sessions start at
+  // `false` when the OTP system setting is on, gating dashboard access until
+  // they confirm the emailed code — see lib/otp.ts.
+  otpVerified Boolean  @default(true)
 
   @@map("session")
 }
@@ -389,4 +394,16 @@ model CompanySettings {
   updatedAt DateTime @updatedAt
 
   @@map("company_settings")
+}
+
+// System-wide toggles configurable by administrators. Stored as a single row
+// (id = "default"), same pattern as CompanySettings.
+model SystemSettings {
+  id              String   @id @default("default")
+  // When true, AGENT/MANAGER/ADMIN accounts must confirm a one-time code
+  // emailed to them after their password to complete sign-in.
+  otpLoginEnabled Boolean  @default(false)
+  updatedAt       DateTime @updatedAt
+
+  @@map("system_settings")
 }

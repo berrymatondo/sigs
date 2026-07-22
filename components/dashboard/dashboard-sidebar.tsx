@@ -33,6 +33,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { SiteLogo } from "@/components/site-logo"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { authClient } from "@/lib/auth-client"
 import { roleLabels } from "@/lib/domain"
 import type { SessionUser } from "@/lib/session"
@@ -190,6 +191,12 @@ export function DashboardSidebar({ user }: { user: SessionUser }) {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border p-3">
+        <div className="mb-2 flex items-center justify-between px-1">
+          <span className="text-[0.7rem] font-semibold uppercase tracking-wider text-sidebar-foreground/40">
+            Thème
+          </span>
+          <ThemeToggle className="text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground" />
+        </div>
         <div className="flex items-center gap-3 rounded-xl border border-sidebar-border bg-sidebar-accent/40 p-2.5">
           <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sm font-semibold text-sidebar-primary-foreground shadow-sm">
             {user.name.charAt(0).toUpperCase()}

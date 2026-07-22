@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { requireRole, requireUser, isStaff } from "@/lib/session"
 import { generateDossierNumero, generateQrDataUrl } from "@/lib/domain"
 import { notifyDossierCreated, notifyDossierCloture } from "@/lib/email"
+import { notifyClientStatutChangeWhatsApp } from "@/lib/whatsapp"
 import { revalidatePath } from "next/cache"
 
 /**
@@ -99,7 +100,7 @@ export async function getDossiers(query?: string, statut?: string) {
     orderBy: { createdAt: "desc" },
     include: {
       client: true,
-      agent: { select: { name: true } },
+      agent: { select: { name: true, image: true, role: true } },
       _count: { select: { documents: true, taches: true } },
       processDefinition: { select: { nom: true } },
       stepStates: {
@@ -127,7 +128,7 @@ export async function getDossier(id: string) {
           },
         },
       },
-      agent: { select: { id: true, name: true } },
+      agent: { select: { id: true, name: true, image: true, role: true } },
       documents: { orderBy: { createdAt: "desc" } },
       taches: { orderBy: { createdAt: "desc" }, include: { agent: { select: { name: true } } } },
       statutHistory: { orderBy: { createdAt: "desc" } },
@@ -313,6 +314,7 @@ export async function updateDossier(id: string, data: Partial<DossierInput>) {
       ...(data.agentId !== undefined ? { agentId: data.agentId || null } : {}),
       ...(attachProcessId ? { processDefinitionId: attachProcessId, etapeActuelle: 0 } : {}),
     },
+    include: { client: true },
   })
   // Build the process instance when a process is attached for the first time.
   if (attachProcessId) {
@@ -321,6 +323,7 @@ export async function updateDossier(id: string, data: Partial<DossierInput>) {
   // Log status change made through the edit dialog
   if (data.statut !== undefined && current && current.statut !== (data.statut as never)) {
     await recordStatutChange(id, current.statut, data.statut, user)
+    await notifyClientStatutChangeWhatsApp(dossier, data.statut)
   }
   // Sync the auto-task when the assignment changed through the edit dialog.
   if (data.agentId !== undefined) {
@@ -361,6 +364,7 @@ export async function updateDossierStatut(id: string, statut: string) {
       include: { client: true },
     })
     await recordStatutChange(id, current.statut, statut, user)
+    await notifyClientStatutChangeWhatsApp(dossier, statut)
     // Notify administrators when a dossier is closed
     if (statut === "TERMINE") await notifyDossierCloture(dossier)
   }
@@ -383,6 +387,7 @@ export async function clotureDossier(id: string) {
       include: { client: true },
     })
     await recordStatutChange(id, current.statut, "TERMINE", user)
+    await notifyClientStatutChangeWhatsApp(dossier, "TERMINE")
     // Notify administrators of the closure
     await notifyDossierCloture(dossier)
   }
@@ -407,6 +412,55 @@ export async function deleteDossier(id: string) {
   }
   await prisma.dossier.delete({ where: { id } })
   revalidatePath("/dashboard/dossiers")
+}
+
+function avgProcessingDays(rows: { createdAt: Date; updatedAt: Date }[]) {
+  if (rows.length === 0) return 0
+  const totalDays = rows.reduce((sum, d) => sum + (d.updatedAt.getTime() - d.createdAt.getTime()) / 86_400_000, 0)
+  return totalDays / rows.length
+}
+
+function pctDelta(current: number, previous: number) {
+  if (previous === 0) return current === 0 ? 0 : null
+  return Math.round(((current - previous) / previous) * 1000) / 10
+}
+
+/** Real, computed KPIs shown on the dossiers list's summary banner. */
+export async function getDossiersOverview() {
+  await requireUser()
+
+  const now = new Date()
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 86_400_000)
+  const sixtyDaysAgo = new Date(now.getTime() - 60 * 86_400_000)
+
+  const [total, dossiersActifs, dossiersTermines, nouveauxCeMois, closedLast60d] = await Promise.all([
+    prisma.dossier.count(),
+    prisma.dossier.count({ where: { statut: { notIn: ["TERMINE", "ARCHIVE"] as never } } }),
+    prisma.dossier.count({ where: { statut: "TERMINE" as never } }),
+    prisma.dossier.count({ where: { createdAt: { gte: startOfMonth } } }),
+    prisma.dossier.findMany({
+      where: { statut: "TERMINE" as never, updatedAt: { gte: sixtyDaysAgo } },
+      select: { createdAt: true, updatedAt: true },
+    }),
+  ])
+
+  const last30d = closedLast60d.filter((d) => d.updatedAt >= thirtyDaysAgo)
+  const prev30d = closedLast60d.filter((d) => d.updatedAt < thirtyDaysAgo)
+  // Fall back to the wider 60-day window when there's nothing closed in the
+  // last 30 days, so the average isn't a misleading zero.
+  const tempsMoyenJours = avgProcessingDays(last30d.length > 0 ? last30d : closedLast60d)
+  const tempsMoyenDeltaPct = last30d.length > 0 && prev30d.length > 0
+    ? pctDelta(avgProcessingDays(last30d), avgProcessingDays(prev30d))
+    : null
+
+  return {
+    performance: total > 0 ? Math.round((dossiersTermines / total) * 100) : 0,
+    tempsMoyenJours,
+    tempsMoyenDeltaPct,
+    dossiersActifs,
+    nouveauxCeMois,
+  }
 }
 
 export async function getClientsForSelect() {

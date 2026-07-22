@@ -6,12 +6,19 @@ import { revalidatePath } from "next/cache"
 
 export type AvisState = { ok: boolean; message: string } | null
 
-// Public list of reviews shown on the landing page (newest first).
+// Public list of reviews shown on the landing page (newest first). Falls
+// back to an empty list on a database hiccup so the homepage still renders
+// (with its default testimonials) instead of crashing the whole page.
 export async function getAvis() {
-  return prisma.avis.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 12,
-  })
+  try {
+    return await prisma.avis.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 12,
+    })
+  } catch (error) {
+    console.log("[v0] Échec du chargement des avis:", (error as Error).message)
+    return []
+  }
 }
 
 export async function submitAvis(

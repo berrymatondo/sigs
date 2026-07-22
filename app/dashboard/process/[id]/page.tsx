@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { ArrowLeft, Lock } from "lucide-react"
+import { ArrowLeft, Lock, Workflow } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/dashboard/page-header"
 import { ProcessBuilder, type ProcessDraft } from "@/components/dashboard/process-builder"
 import { requireRole } from "@/lib/session"
@@ -51,6 +52,13 @@ export default async function EditProcessPage({
           locked
             ? "Ce process a des dossiers en cours : le layout est en lecture seule."
             : "Modifiez les étapes, sous-étapes, la durée et le coût."
+        }
+        action={
+          <Button asChild variant="outline">
+            <Link href={`/dashboard/process/${process.id}/schema`}>
+              <Workflow className="size-4" /> Voir le schéma
+            </Link>
+          </Button>
         }
       />
 

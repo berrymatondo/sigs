@@ -193,6 +193,51 @@ export async function toggleProcessActif(id: string, actif: boolean) {
   revalidatePath(`/dashboard/process/${id}`)
 }
 
+/**
+ * A process definition plus, for each step, how many dossiers are currently
+ * actively working on it, and how many dossiers have completed the whole
+ * process — the live counts shown on the process schema diagram.
+ */
+export async function getProcessSchema(id: string) {
+  await requireRole(["MANAGER", "ADMIN"])
+  const process = await prisma.processDefinition.findUnique({
+    where: { id },
+    include: {
+      steps: {
+        orderBy: { ordre: "asc" },
+        include: { subSteps: { orderBy: { ordre: "asc" } } },
+      },
+    },
+  })
+  if (!process) return null
+
+  const dossiers = await prisma.dossier.findMany({
+    where: { processDefinitionId: id },
+    select: { etapeActuelle: true, statut: true },
+  })
+
+  const stepCounts = new Map<number, number>()
+  let termineCount = 0
+  for (const d of dossiers) {
+    if (d.statut === "TERMINE" || d.statut === "ARCHIVE") {
+      termineCount += 1
+      continue
+    }
+    stepCounts.set(d.etapeActuelle, (stepCounts.get(d.etapeActuelle) ?? 0) + 1)
+  }
+
+  return {
+    ...process,
+    steps: process.steps.map((step) => ({
+      ...step,
+      // A dossier "at" this step has etapeActuelle === ordre - 1 (0-based).
+      dossiersEnCours: stepCounts.get(step.ordre - 1) ?? 0,
+    })),
+    dossiersTermines: termineCount,
+    dossiersTotal: dossiers.length,
+  }
+}
+
 /** Active processes offered when creating a dossier. */
 export async function getActiveProcessesForSelect() {
   return prisma.processDefinition.findMany({

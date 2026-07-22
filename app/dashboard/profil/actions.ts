@@ -9,7 +9,10 @@ export async function getMyDossiers() {
   return prisma.dossier.findMany({
     where: { client: { userId: user.id } },
     orderBy: { createdAt: "desc" },
-    include: { _count: { select: { documents: true } } },
+    include: {
+      _count: { select: { documents: true } },
+      processDefinition: { select: { _count: { select: { steps: true } } } },
+    },
   })
 }
 

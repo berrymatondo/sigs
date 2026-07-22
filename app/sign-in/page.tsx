@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation"
-import { getSession } from "@/lib/session"
+import { getSession, isPendingOtp } from "@/lib/session"
 import { AuthForm } from "@/components/auth-form"
 
 export default async function SignInPage({
@@ -9,6 +9,9 @@ export default async function SignInPage({
 }) {
   const { redirect: redirectTo } = await searchParams
   const session = await getSession()
-  if (session?.user) redirect(redirectTo || "/dashboard")
+  if (session?.user) {
+    if (await isPendingOtp()) redirect("/verify-otp")
+    redirect(redirectTo || "/dashboard")
+  }
   return <AuthForm mode="sign-in" redirectTo={redirectTo} />
 }

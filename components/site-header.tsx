@@ -7,6 +7,7 @@ import { Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
 import { SiteLogo } from "@/components/site-logo"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { cn } from "@/lib/utils"
 
 const links = [
@@ -40,6 +41,7 @@ export function SiteHeader({ isAuthenticated }: { isAuthenticated: boolean }) {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
+          <ThemeToggle />
           {isAuthenticated ? (
             <Button asChild>
               <Link href="/dashboard">Mon espace</Link>
@@ -79,7 +81,11 @@ export function SiteHeader({ isAuthenticated }: { isAuthenticated: boolean }) {
                   {link.label}
                 </Link>
               ))}
-              <div className="mt-4 flex flex-col gap-2 border-t border-border pt-4">
+              <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
+                <span className="text-sm font-medium text-muted-foreground">Thème</span>
+                <ThemeToggle />
+              </div>
+              <div className="mt-2 flex flex-col gap-2">
                 {isAuthenticated ? (
                   <Button asChild onClick={() => setOpen(false)}>
                     <Link href="/dashboard">Mon espace</Link>

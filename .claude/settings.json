@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm ls *)",
+      "Bash(npm install *)",
+      "Bash(npx playwright *)",
+      "Bash(node \"C:\\\\Users\\\\Matondo\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-Matondo-projets-next-sigs\\\\8bd5d585-cc96-4e5d-aba9-310871e08fc7\\\\scratchpad\\\\capture-promo-screenshots.mjs\")",
+      "Bash(node capture-promo-screenshots.mjs)",
+      "Bash(npx eslint *)",
+      "PowerShell(Stop-Process -Id 24852 -Force -ErrorAction Stop)",
+      "PowerShell(\"stopped\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000/services)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000/contact)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000/)",
+      "PowerShell(Get-Process -Id 47652 -ErrorAction SilentlyContinue)",
+      "PowerShell(Stop-Process -Id 47652 -Force -ErrorAction Stop)",
+      "Bash(curl -s -o /dev/null -w \"services: %{http_code}\\\\n\" http://localhost:3000/services)",
+      "Bash(curl -s -o /dev/null -w \"contact: %{http_code}\\\\n\" http://localhost:3000/contact)",
+      "Bash(curl -s -o /dev/null -w \"promo: %{http_code}\\\\n\" http://localhost:3000/promo)",
+      "Bash(curl -s -o /dev/null -w \"home: %{http_code}\\\\n\" http://localhost:3000/)",
+      "Bash(node test-login.mjs)",
+      "Bash(node test-login2.mjs)",
+      "Bash(node test-signin.mjs)",
+      "Bash(node ./test-browsers.mjs)",
+      "Bash(sed -i \"s#857c2e54-fa6f-418b-8819-7742b0864bcb#74bcb785-7a0f-460e-9d03-cac7e541a9f4#\" ./test-schema-view.mjs)",
+      "Bash(node ./test-schema-view.mjs)"
+    ]
+  }
+}

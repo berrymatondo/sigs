@@ -3,7 +3,8 @@ import { Users, FolderKanban, Clock, CheckCircle2, FileText, ListTodo } from "lu
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageHeader } from "@/components/dashboard/page-header"
 import { StatCard } from "@/components/dashboard/stat-card"
-import { StatutBadge, PrioriteBadge } from "@/components/dashboard/badges"
+import { StatutBadge, PrioriteBadge, DossierTypeIconTile } from "@/components/dashboard/badges"
+import { MiniStepper } from "@/components/dashboard/mini-stepper"
 import { requireUser } from "@/lib/session"
 import { roleLabels, dossierTypeLabels, formatClientName } from "@/lib/domain"
 import { getDashboardStats, getRecentDossiers, getRecentTaches } from "./actions"
@@ -27,24 +28,43 @@ export default async function DashboardPage() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {!stats.isClient && (
-          <StatCard label="Clients" value={stats.totalClients} icon={Users} />
+          <StatCard
+            label="Clients"
+            value={stats.totalClients}
+            icon={Users}
+            tint="bg-primary/10"
+          />
         )}
-        <StatCard label="Dossiers" value={stats.totalDossiers} icon={FolderKanban} />
+        <StatCard label="Dossiers" value={stats.totalDossiers} icon={FolderKanban} tint="bg-primary/10" />
         <StatCard
           label="En cours"
           value={stats.dossiersEnCours}
           icon={Clock}
           accent="text-amber-600"
+          tint="bg-amber-100 dark:bg-amber-950/40"
         />
         <StatCard
           label="Terminés / validés"
           value={stats.dossiersTermines}
           icon={CheckCircle2}
           accent="text-emerald-600"
+          tint="bg-emerald-100 dark:bg-emerald-950/40"
         />
-        <StatCard label="Documents" value={stats.totalDocuments} icon={FileText} accent="text-blue-600" />
+        <StatCard
+          label="Documents"
+          value={stats.totalDocuments}
+          icon={FileText}
+          accent="text-blue-600"
+          tint="bg-blue-100 dark:bg-blue-950/40"
+        />
         {!stats.isClient && (
-          <StatCard label="Tâches actives" value={stats.tachesAFaire} icon={ListTodo} accent="text-orange-600" />
+          <StatCard
+            label="Tâches actives"
+            value={stats.tachesAFaire}
+            icon={ListTodo}
+            accent="text-orange-600"
+            tint="bg-orange-100 dark:bg-orange-950/40"
+          />
         )}
       </div>
 
@@ -60,17 +80,38 @@ export default async function DashboardPage() {
             {dossiers.length === 0 ? (
               <p className="py-6 text-center text-sm text-muted-foreground">Aucun dossier pour le moment.</p>
             ) : (
-              dossiers.map((d) => (
-                <div key={d.id} className="flex items-center justify-between gap-3 rounded-lg border p-3">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium">{d.nom}</p>
-                    <p className="truncate text-xs text-muted-foreground">
-                      {d.numero} · {dossierTypeLabels[d.type]} · {formatClientName(d.client)}
-                    </p>
-                  </div>
-                  <StatutBadge statut={d.statut} />
-                </div>
-              ))
+              dossiers.map((d) => {
+                const totalSteps = d.processDefinition?._count.steps ?? 0
+                return (
+                  <Link
+                    key={d.id}
+                    href={`/dashboard/dossiers/${d.id}`}
+                    className="flex items-start gap-3 rounded-xl border p-3 transition-colors hover:bg-secondary"
+                  >
+                    <DossierTypeIconTile type={d.type} className="size-9 rounded-lg" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium">{d.nom}</p>
+                          <p className="truncate text-xs text-muted-foreground">
+                            {d.numero} · {dossierTypeLabels[d.type]}
+                            {stats.isClient ? "" : ` · ${formatClientName(d.client)}`}
+                          </p>
+                        </div>
+                        <StatutBadge statut={d.statut} />
+                      </div>
+                      {totalSteps > 0 ? (
+                        <MiniStepper
+                          totalSteps={totalSteps}
+                          etapeActuelle={d.etapeActuelle}
+                          isClosed={d.statut === "TERMINE" || d.statut === "ARCHIVE"}
+                          className="mt-2"
+                        />
+                      ) : null}
+                    </div>
+                  </Link>
+                )
+              })
             )}
           </CardContent>
         </Card>

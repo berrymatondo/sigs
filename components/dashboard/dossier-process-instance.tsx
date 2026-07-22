@@ -20,6 +20,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 import { formatDuree } from "@/lib/domain"
 import { DownloadButton } from "@/components/dashboard/download-button"
+import { MiniStepper } from "@/components/dashboard/mini-stepper"
 import { toggleSubStep, validateStep } from "@/app/dashboard/dossiers/process-actions"
 import { createDocument } from "@/app/dashboard/documents/actions"
 
@@ -245,20 +246,23 @@ export function DossierProcessInstance({
   return (
     <div className="space-y-4">
       <Card>
-        <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
-          <div>
-            <p className="text-sm font-medium">{processName}</p>
-            <p className="text-xs text-muted-foreground">
-              {doneCount} / {totalSteps} étape{totalSteps > 1 ? "s" : ""} validée
-              {doneCount > 1 ? "s" : ""}
-            </p>
+        <CardContent className="flex flex-col gap-3 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium">{processName}</p>
+              <p className="text-xs text-muted-foreground">
+                {doneCount} / {totalSteps} étape{totalSteps > 1 ? "s" : ""} validée
+                {doneCount > 1 ? "s" : ""}
+              </p>
+            </div>
+            <div className="h-2 w-40 overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full bg-primary transition-all"
+                style={{ width: `${(doneCount / totalSteps) * 100}%` }}
+              />
+            </div>
           </div>
-          <div className="h-2 w-40 overflow-hidden rounded-full bg-muted">
-            <div
-              className="h-full rounded-full bg-primary transition-all"
-              style={{ width: `${(doneCount / totalSteps) * 100}%` }}
-            />
-          </div>
+          <MiniStepper totalSteps={totalSteps} etapeActuelle={etapeActuelle} isClosed={isClosed} fullWidth />
         </CardContent>
       </Card>
 

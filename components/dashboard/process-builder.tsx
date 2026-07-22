@@ -3,7 +3,18 @@
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { Plus, Trash2, GripVertical, ChevronDown, ChevronUp, X } from "lucide-react"
+import {
+  Plus,
+  Trash2,
+  ChevronDown,
+  ChevronUp,
+  Calendar,
+  FileText,
+  MessageSquare,
+  Folder,
+  Paperclip,
+  Info,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -221,159 +232,197 @@ export function ProcessBuilder({
         </div>
 
         {steps.map((step, si) => (
-          <Card key={si} className="overflow-hidden">
-            <CardContent className="space-y-4 p-5">
-              <div className="flex items-start gap-3">
-                <span className="mt-1 flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-                  {si + 1}
-                </span>
-                <div className="flex-1 space-y-2">
+          <div key={si} className="flex items-start gap-4">
+            {/* Timeline: numbered circle + dashed connector down to the next step */}
+            <div className="flex shrink-0 flex-col items-center self-stretch">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-primary to-primary-to text-base font-bold text-primary-foreground shadow-md">
+                {si + 1}
+              </span>
+              {si < steps.length - 1 && (
+                <span className="mt-1 w-px flex-1 border-l-2 border-dashed border-primary/30" />
+              )}
+            </div>
+
+            <Card className="mb-4 flex-1 overflow-hidden">
+              <CardContent className="space-y-4 p-5">
+                <div className="flex items-start justify-between gap-3">
                   <Input
                     value={step.nom}
                     onChange={(e) => updateStep(si, { nom: e.target.value })}
                     placeholder={`Nom de l'étape ${si + 1}`}
                     disabled={readOnly}
-                    className="font-medium"
+                    className="border-none bg-transparent px-0 text-lg font-bold shadow-none focus-visible:ring-0 disabled:opacity-100"
                   />
-                </div>
-                {!readOnly && (
                   <div className="flex shrink-0 items-center gap-1">
+                    {!readOnly && (
+                      <>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => moveStep(si, -1)}
+                          disabled={si === 0}
+                        >
+                          <ChevronUp className="size-4" />
+                          <span className="sr-only">Monter</span>
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => moveStep(si, 1)}
+                          disabled={si === steps.length - 1}
+                        >
+                          <ChevronDown className="size-4" />
+                          <span className="sr-only">Descendre</span>
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeStep(si)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="size-4" />
+                          <span className="sr-only">Supprimer l'étape</span>
+                        </Button>
+                      </>
+                    )}
                     <Button
                       type="button"
                       variant="ghost"
                       size="icon"
-                      onClick={() => moveStep(si, -1)}
-                      disabled={si === 0}
+                      onClick={() => updateStep(si, { collapsed: !step.collapsed })}
                     >
-                      <ChevronUp className="size-4" />
-                      <span className="sr-only">Monter</span>
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => moveStep(si, 1)}
-                      disabled={si === steps.length - 1}
-                    >
-                      <ChevronDown className="size-4" />
-                      <span className="sr-only">Descendre</span>
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeStep(si)}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="size-4" />
-                      <span className="sr-only">Supprimer l'étape</span>
+                      {step.collapsed ? <ChevronDown className="size-4" /> : <ChevronUp className="size-4" />}
+                      <span className="sr-only">{step.collapsed ? "Déplier" : "Replier"}</span>
                     </Button>
                   </div>
-                )}
-              </div>
+                </div>
 
-              <div className="grid gap-3 pl-10 sm:grid-cols-2">
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Durée (jours)</Label>
-                  <Input
+                <div className="flex w-fit items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+                  <Calendar className="size-3.5" />
+                  Durée estimée :
+                  <input
                     type="number"
                     min={0}
                     value={step.dureeJours}
                     onChange={(e) => updateStep(si, { dureeJours: Number(e.target.value) })}
                     disabled={readOnly}
+                    className="w-10 border-none bg-transparent p-0 text-xs font-semibold text-primary focus:outline-none disabled:opacity-100"
                   />
+                  jour{step.dureeJours > 1 ? "s" : ""}
                 </div>
-              </div>
-              <div className="grid gap-3 pl-10 sm:grid-cols-2">
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Description</Label>
-                  <Textarea
-                    rows={2}
-                    value={step.description}
-                    onChange={(e) => updateStep(si, { description: e.target.value })}
-                    disabled={readOnly}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Commentaire</Label>
-                  <Textarea
-                    rows={2}
-                    value={step.commentaire}
-                    onChange={(e) => updateStep(si, { commentaire: e.target.value })}
-                    disabled={readOnly}
-                  />
-                </div>
-              </div>
 
-              {/* Sub-steps */}
-              <div className="space-y-2 pl-10">
-                <div className="flex items-center justify-between">
-                  <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Sous-étapes ({step.subSteps.length})
-                  </Label>
-                  {!readOnly && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => addSubStep(si)}
-                    >
-                      <Plus className="size-3.5" /> Sous-étape
-                    </Button>
-                  )}
-                </div>
-                {step.subSteps.length === 0 ? (
-                  <p className="text-xs text-muted-foreground">Aucune sous-étape.</p>
-                ) : (
-                  step.subSteps.map((sub, ji) => (
-                    <div key={ji} className="rounded-lg border bg-muted/30 p-3">
-                      <div className="flex items-center gap-2">
-                        <GripVertical className="size-4 shrink-0 text-muted-foreground" />
-                        <span className="text-xs font-medium text-muted-foreground">
-                          {si + 1}.{ji + 1}
-                        </span>
-                        <Input
-                          value={sub.nom}
-                          onChange={(e) => updateSubStep(si, ji, { nom: e.target.value })}
-                          placeholder="Nom de la sous-étape"
+                {!step.collapsed && (
+                  <>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-lg border bg-primary/5 p-3">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-primary">
+                          <FileText className="size-4" /> Description
+                        </div>
+                        <Textarea
+                          rows={3}
+                          value={step.description}
+                          onChange={(e) => updateStep(si, { description: e.target.value })}
                           disabled={readOnly}
-                          className="h-8"
+                          className="mt-2 border-none bg-transparent p-0 shadow-none focus-visible:ring-0 disabled:opacity-100"
                         />
-                        {!readOnly && (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removeSubStep(si, ji)}
-                            className="size-8 shrink-0 text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="size-3.5" />
-                            <span className="sr-only">Supprimer la sous-étape</span>
-                          </Button>
-                        )}
                       </div>
-                      <div className="mt-2 pl-6">
-                        <Label className="text-xs text-muted-foreground">
-                          Documents à attacher (séparés par des virgules)
-                        </Label>
-                        <Input
-                          value={sub.documentsRequis.join(", ")}
-                          onChange={(e) =>
-                            updateSubStep(si, ji, {
-                              documentsRequis: e.target.value.split(",").map((d) => d.trimStart()),
-                            })
-                          }
-                          placeholder="Ex: Passeport, Photo d'identité"
+                      <div className="rounded-lg border bg-primary/5 p-3">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-primary">
+                          <MessageSquare className="size-4" /> Commentaire
+                        </div>
+                        <Textarea
+                          rows={3}
+                          value={step.commentaire}
+                          onChange={(e) => updateStep(si, { commentaire: e.target.value })}
+                          placeholder="Ajouter un commentaire..."
                           disabled={readOnly}
-                          className="mt-1 h-8"
+                          className="mt-2 border-none bg-transparent p-0 shadow-none focus-visible:ring-0 disabled:opacity-100"
                         />
                       </div>
                     </div>
-                  ))
+
+                    {/* Sub-steps */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          Sous-étapes ({step.subSteps.length})
+                        </Label>
+                        {!readOnly && (
+                          <Button type="button" variant="ghost" size="sm" onClick={() => addSubStep(si)}>
+                            <Plus className="size-3.5" /> Sous-étape
+                          </Button>
+                        )}
+                      </div>
+                      {step.subSteps.length === 0 ? (
+                        <p className="text-xs text-muted-foreground">Aucune sous-étape.</p>
+                      ) : (
+                        step.subSteps.map((sub, ji) => (
+                          <div key={ji} className="rounded-lg border p-3">
+                            <div className="flex items-center gap-2">
+                              <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-xs font-semibold text-primary">
+                                {si + 1}.{ji + 1}
+                              </span>
+                              <Folder className="size-4 shrink-0 text-primary" />
+                              <Input
+                                value={sub.nom}
+                                onChange={(e) => updateSubStep(si, ji, { nom: e.target.value })}
+                                placeholder="Nom de la sous-étape"
+                                disabled={readOnly}
+                                className="h-8"
+                              />
+                              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
+                                <Paperclip className="size-3" /> Documents requis
+                              </span>
+                              {!readOnly && (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => removeSubStep(si, ji)}
+                                  className="size-8 shrink-0 text-destructive hover:text-destructive"
+                                >
+                                  <Trash2 className="size-3.5" />
+                                  <span className="sr-only">Supprimer la sous-étape</span>
+                                </Button>
+                              )}
+                            </div>
+                            <div className="mt-2 pl-9">
+                              <Label className="text-xs text-muted-foreground">
+                                Documents à attacher (séparés par des virgules)
+                              </Label>
+                              <Input
+                                value={sub.documentsRequis.join(", ")}
+                                onChange={(e) =>
+                                  updateSubStep(si, ji, {
+                                    documentsRequis: e.target.value.split(",").map((d) => d.trimStart()),
+                                  })
+                                }
+                                placeholder="Ex: Passeport, Photo d'identité"
+                                disabled={readOnly}
+                                className="mt-1 h-8"
+                              />
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+
+                    <div className="flex items-start gap-2 rounded-lg bg-primary/5 p-3 text-xs text-muted-foreground">
+                      <Info className="mt-0.5 size-4 shrink-0 text-primary" />
+                      <p>
+                        <span className="font-semibold text-primary">À savoir</span> — assurez-vous que les
+                        informations de cette étape sont complètes et à jour avant de l&apos;utiliser dans un
+                        dossier.
+                      </p>
+                    </div>
+                  </>
                 )}
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         ))}
       </div>
 
