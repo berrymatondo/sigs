@@ -2,10 +2,6 @@ import { betterAuth } from "better-auth"
 import { prismaAdapter } from "better-auth/adapters/prisma"
 import { prisma } from "@/lib/prisma"
 import { sendPasswordReset } from "@/lib/email"
-import { generateAndSendLoginOtp } from "@/lib/otp"
-import { getSystemSettings } from "@/lib/system-settings"
-
-const STAFF_ROLES = ["AGENT", "MANAGER", "ADMIN"]
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -48,40 +44,6 @@ export const auth = betterAuth({
   session: {
     expiresIn: 60 * 60 * 24 * 7,
     updateAge: 60 * 60 * 24,
-    additionalFields: {
-      // False right after creation means "must confirm an emailed OTP before
-      // this session is trusted" — set by the databaseHooks below for staff
-      // sign-ins while the OTP login setting is on. lib/session.ts reads this
-      // to gate dashboard access.
-      otpVerified: {
-        type: "boolean",
-        required: false,
-        defaultValue: true,
-        input: false,
-      },
-    },
-  },
-  databaseHooks: {
-    session: {
-      create: {
-        after: async (session) => {
-          const user = await prisma.user.findUnique({
-            where: { id: session.userId },
-            select: { role: true, email: true, name: true },
-          })
-          if (!user || !STAFF_ROLES.includes(user.role)) return
-          const settings = await getSystemSettings()
-          if (!settings.otpLoginEnabled) return
-          await prisma.session.update({ where: { id: session.id }, data: { otpVerified: false } })
-          await generateAndSendLoginOtp({
-            sessionId: session.id,
-            userId: session.userId,
-            email: user.email,
-            name: user.name,
-          })
-        },
-      },
-    },
   },
   trustedOrigins: [
     ...(process.env.V0_RUNTIME_URL ? [process.env.V0_RUNTIME_URL] : []),

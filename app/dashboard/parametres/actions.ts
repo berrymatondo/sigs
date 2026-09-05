@@ -40,17 +40,3 @@ export async function updateCompanySettings(
 
   return { ok: true, message: "Coordonnées mises à jour avec succès." }
 }
-
-const SYSTEM_SETTINGS_ID = "default"
-
-// Toggles whether AGENT/MANAGER/ADMIN accounts must confirm an emailed OTP
-// after their password to finish signing in.
-export async function updateOtpLoginEnabled(enabled: boolean): Promise<void> {
-  await requireRole(["ADMIN"])
-  await prisma.systemSettings.upsert({
-    where: { id: SYSTEM_SETTINGS_ID },
-    update: { otpLoginEnabled: enabled },
-    create: { id: SYSTEM_SETTINGS_ID, otpLoginEnabled: enabled },
-  })
-  revalidatePath("/dashboard/parametres")
-}

@@ -99,3 +99,20 @@ export async function notifyClientStatutChangeWhatsApp(
     `vient de passer à : *${statutLabel}*.\n\nSuivez son avancement depuis votre espace SIGS.`
   return sendWhatsAppText(dossier.client.telephone, body)
 }
+
+/**
+ * Notifies the client that their agent replied in the dossier's chat. No-op
+ * when the client has no phone number on file or WhatsApp isn't configured.
+ */
+export async function notifyClientNewMessageWhatsApp(
+  dossier: DossierForWhatsApp,
+  texte: string,
+): Promise<boolean> {
+  if (!dossier.client.telephone) return false
+  const clientName = formatClientName(dossier.client)
+  const excerpt = texte.length > 200 ? `${texte.slice(0, 200)}…` : texte
+  const body =
+    `Bonjour ${clientName}, vous avez un nouveau message concernant votre dossier ${dossier.numero} ` +
+    `(${dossier.nom}) :\n\n« ${excerpt} »\n\nRépondez depuis votre espace SIGS.`
+  return sendWhatsAppText(dossier.client.telephone, body)
+}

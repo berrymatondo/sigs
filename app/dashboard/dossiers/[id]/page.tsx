@@ -18,10 +18,12 @@ import { DossierEditDialog } from "@/components/dashboard/dossier-edit-dialog"
 import { requireUser, isStaff } from "@/lib/session"
 import { tacheStatutLabels, formatUsd, formatClientName, roleLabels } from "@/lib/domain"
 import { DossierProcessInstance } from "@/components/dashboard/dossier-process-instance"
+import { DossierChat } from "@/components/dashboard/dossier-chat"
 import { getDossier, deleteDossier, getAgentsForSelect } from "../actions"
 import { getActiveProcessesForSelect } from "../../process/actions"
 import { deleteDocument } from "../../documents/actions"
 import { deleteTache } from "../../taches/actions"
+import { getMessages } from "../messages-actions"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 
@@ -53,6 +55,7 @@ export default async function DossierDetailPage({
   // Active processes are offered in the edit dialog so an agent can attach one
   // when taking on a dossier that was created without a process (e.g. by a visitor).
   const processes = canManage && !dossier.processDefinition ? await getActiveProcessesForSelect() : []
+  const { messages, currentUserId } = await getMessages(dossier.id)
 
   return (
     <div>
@@ -239,6 +242,7 @@ export default async function DossierDetailPage({
           ) : null}
           <TabsTrigger value="documents">Documents ({dossier.documents.length})</TabsTrigger>
           {staff ? <TabsTrigger value="taches">Tâches ({dossier.taches.length})</TabsTrigger> : null}
+          <TabsTrigger value="messages">Messages ({messages.length})</TabsTrigger>
         </TabsList>
 
         {dossier.processDefinition ? (
@@ -359,6 +363,19 @@ export default async function DossierDetailPage({
             </Card>
           </TabsContent>
         ) : null}
+
+        <TabsContent value="messages">
+          <DossierChat
+            dossierId={dossier.id}
+            currentUserId={currentUserId}
+            initialMessages={messages.map((m) => ({
+              id: m.id,
+              texte: m.texte,
+              createdAt: m.createdAt,
+              sender: m.sender,
+            }))}
+          />
+        </TabsContent>
       </Tabs>
     </div>
   )

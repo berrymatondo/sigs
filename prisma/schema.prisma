@@ -41,6 +41,8 @@ model User {
   uploadedDocuments Document[] @relation("UploadedDocuments")
   personalDocuments Document[] @relation("PersonalDocuments")
   avis              Avis[]     @relation("UserAvis")
+  messages          Message[]
+  notifications     Notification[]
 
   @@map("user")
 }
@@ -188,8 +190,41 @@ model Dossier {
   taches       Tache[]
   statutHistory DossierStatutHistory[]
   stepStates   DossierStepState[]
+  messages     Message[]
 
   @@map("dossier")
+}
+
+// A message thread scoped to one dossier, exchanged between its client and
+// the staff handling it (agent/manager/admin).
+model Message {
+  id        String   @id @default(uuid())
+  dossierId String
+  dossier   Dossier  @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  texte     String
+  createdAt DateTime @default(now())
+
+  @@index([dossierId])
+  @@map("message")
+}
+
+// In-app notification shown via the bell icon. `type` is a free-form tag
+// ("MESSAGE" today) so future notification kinds don't need a schema change.
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  titre     String
+  texte     String
+  lien      String?
+  lu        Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, lu])
+  @@map("notification")
 }
 
 model DossierStatutHistory {

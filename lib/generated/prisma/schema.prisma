@@ -36,30 +36,27 @@ model User {
   accounts Account[]
 
   client            Client?
-  dossiersAgent     Dossier[]  @relation("AgentDossiers")
+  dossiersAgent     Dossier[]      @relation("AgentDossiers")
   taches            Tache[]
-  uploadedDocuments Document[] @relation("UploadedDocuments")
-  personalDocuments Document[] @relation("PersonalDocuments")
-  avis              Avis[]     @relation("UserAvis")
+  uploadedDocuments Document[]     @relation("UploadedDocuments")
+  personalDocuments Document[]     @relation("PersonalDocuments")
+  avis              Avis[]         @relation("UserAvis")
+  messages          Message[]
+  notifications     Notification[]
 
   @@map("user")
 }
 
 model Session {
-  id          String   @id
-  expiresAt   DateTime
-  token       String   @unique
-  ipAddress   String?
-  userAgent   String?
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  // True once the login OTP has been verified for this session (or when OTP
-  // login wasn't required for it in the first place). Staff sessions start at
-  // `false` when the OTP system setting is on, gating dashboard access until
-  // they confirm the emailed code — see lib/otp.ts.
-  otpVerified Boolean  @default(true)
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("session")
 }
@@ -193,8 +190,41 @@ model Dossier {
   taches        Tache[]
   statutHistory DossierStatutHistory[]
   stepStates    DossierStepState[]
+  messages      Message[]
 
   @@map("dossier")
+}
+
+// A message thread scoped to one dossier, exchanged between its client and
+// the staff handling it (agent/manager/admin).
+model Message {
+  id        String   @id @default(uuid())
+  dossierId String
+  dossier   Dossier  @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  texte     String
+  createdAt DateTime @default(now())
+
+  @@index([dossierId])
+  @@map("message")
+}
+
+// In-app notification shown via the bell icon. `type` is a free-form tag
+// ("MESSAGE" today) so future notification kinds don't need a schema change.
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  titre     String
+  texte     String
+  lien      String?
+  lu        Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, lu])
+  @@map("notification")
 }
 
 model DossierStatutHistory {
@@ -394,16 +424,4 @@ model CompanySettings {
   updatedAt DateTime @updatedAt
 
   @@map("company_settings")
-}
-
-// System-wide toggles configurable by administrators. Stored as a single row
-// (id = "default"), same pattern as CompanySettings.
-model SystemSettings {
-  id              String   @id @default("default")
-  // When true, AGENT/MANAGER/ADMIN accounts must confirm a one-time code
-  // emailed to them after their password to complete sign-in.
-  otpLoginEnabled Boolean  @default(false)
-  updatedAt       DateTime @updatedAt
-
-  @@map("system_settings")
 }
