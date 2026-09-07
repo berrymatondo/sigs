@@ -1,0 +1,26 @@
+node_modules
+.next
+.git
+.gitignore
+npm-debug.log*
+
+.env
+.env.*
+
+# Generated Prisma client is a build artifact — regenerated fresh inside the
+# image by `npx prisma generate`; the host machine's copy may hold
+# Windows-only binaries or stale temp files from local `prisma generate` runs.
+lib/generated/prisma
+
+*.md
+.vscode
+.idea
+
+Dockerfile
+.dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Local scratch/test scripts, never meant to ship
+test-*.mjs
+scratch-*.mjs

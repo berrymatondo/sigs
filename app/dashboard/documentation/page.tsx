@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/dashboard/page-header"
 import { DocumentationContent } from "@/components/dashboard/documentation/documentation-content"
 import { DocumentationDownloads } from "@/components/dashboard/documentation/documentation-downloads"
 import { requireRole } from "@/lib/session"
+import { roleLabels } from "@/lib/domain"
 import { APP_NAME, APP_OVERVIEW } from "@/lib/documentation"
 
 export const metadata = {
@@ -13,8 +14,9 @@ export const metadata = {
 }
 
 export default async function DocumentationPage() {
-  // Reserved for staff (agents, managers, admins).
-  await requireRole(["AGENT", "MANAGER", "ADMIN"])
+  // Reserved for staff (agents, managers, admins). Content shown below is
+  // filtered to what this specific role can actually do.
+  const user = await requireRole(["AGENT", "MANAGER", "ADMIN"])
 
   return (
     <div>
@@ -70,7 +72,7 @@ export default async function DocumentationPage() {
         </CardContent>
       </Card>
 
-      <DocumentationContent />
+      <DocumentationContent roleLabel={roleLabels[user.role]} />
     </div>
   )
 }

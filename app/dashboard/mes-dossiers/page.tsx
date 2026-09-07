@@ -5,14 +5,16 @@ import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/dashboard/page-header"
 import { StatutBadge, DossierTypeBadge, DossierTypeIconTile } from "@/components/dashboard/badges"
 import { MiniStepper } from "@/components/dashboard/mini-stepper"
+import { MessageBadge } from "@/components/dashboard/message-badge"
 import { requireUser } from "@/lib/session"
 import { getMyDossiers } from "../profil/actions"
+import { getUnreadMessageCounts } from "../dossiers/messages-actions"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 
 export default async function MesDossiersPage() {
   await requireUser()
-  const dossiers = await getMyDossiers()
+  const [dossiers, unreadCounts] = await Promise.all([getMyDossiers(), getUnreadMessageCounts()])
 
   return (
     <div>
@@ -61,6 +63,8 @@ export default async function MesDossiersPage() {
                     <div className="sm:w-44 sm:shrink-0">
                       <DossierTypeBadge type={d.type} />
                     </div>
+
+                    <MessageBadge count={unreadCounts[d.id] ?? 0} className="sm:w-48 sm:shrink-0" />
 
                     <div className="flex items-center gap-1 text-xs text-muted-foreground sm:w-36 sm:shrink-0">
                       <FileText className="size-3.5" /> {d._count.documents} document

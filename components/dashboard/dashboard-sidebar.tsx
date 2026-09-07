@@ -66,6 +66,7 @@ const clientEspace: NavItem[] = [
   { title: "Mes dossiers", href: "/dashboard/mes-dossiers", icon: FolderOpen },
   { title: "Mon profil", href: "/dashboard/profil", icon: UserCircle },
 ]
+const clientOutils: NavItem[] = [{ title: "Guide d'utilisation", href: "/userdoc", icon: BookOpen }]
 
 const adminItems: NavItem[] = [
   { title: "Utilisateurs", href: "/dashboard/administration", icon: ShieldCheck },
@@ -129,7 +130,7 @@ export function DashboardSidebar({ user }: { user: SessionUser }) {
   const mainItems = isClient ? clientMain : staffMain
   const sectionLabel = isClient ? "Mon espace" : "Gestion"
   const sectionItems = isClient
-    ? clientEspace
+    ? [...clientEspace, ...clientOutils]
     : canManage
       ? [...staffGestion, ...managerGestion, ...staffOutils]
       : [...staffGestion, ...staffOutils]

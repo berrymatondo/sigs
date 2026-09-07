@@ -25,6 +25,27 @@ export type DocSection = {
   pages: DocPageDoc[]
 }
 
+/**
+ * Keeps only the pages relevant to a given role label (as used in
+ * `DocPageDoc.audience`, e.g. "Agent", "Manager", "Administrateur"), always
+ * keeping pages tagged "Public" or "Tous les rôles" since those describe
+ * things every staff member can see regardless of their own permissions.
+ * Drops sections left with no visible page.
+ */
+export function filterDocSectionsForRole(sections: DocSection[], roleLabel: string): DocSection[] {
+  return sections
+    .map((section) => ({
+      ...section,
+      pages: section.pages.filter(
+        (page) =>
+          page.audience.includes("Public") ||
+          page.audience.includes("Tous les rôles") ||
+          page.audience.includes(roleLabel),
+      ),
+    }))
+    .filter((section) => section.pages.length > 0)
+}
+
 export const APP_NAME = "SIGS — Système Intégré de Gestion de Services"
 
 export const APP_OVERVIEW = {

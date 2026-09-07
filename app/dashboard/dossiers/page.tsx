@@ -9,9 +9,11 @@ import { StatutFilter } from "@/components/dashboard/statut-filter"
 import { MiniStepper } from "@/components/dashboard/mini-stepper"
 import { AvatarBadge } from "@/components/dashboard/avatar-badge"
 import { DossierRowActions } from "@/components/dashboard/dossier-row-actions"
+import { MessageBadge } from "@/components/dashboard/message-badge"
 import { requireUser } from "@/lib/session"
 import { formatClientName, formatDuree, roleLabels } from "@/lib/domain"
 import { getDossiers, getDossiersOverview } from "./actions"
+import { getUnreadMessageCounts } from "./messages-actions"
 
 export default async function DossiersPage({
   searchParams,
@@ -20,9 +22,10 @@ export default async function DossiersPage({
 }) {
   const { q, statut } = await searchParams
   const user = await requireUser()
-  const [dossiers, overview] = await Promise.all([
+  const [dossiers, overview, unreadCounts] = await Promise.all([
     getDossiers(q, statut),
     getDossiersOverview(),
+    getUnreadMessageCounts(),
   ])
   const isStaff = user.role !== "VISITEUR"
   const canEdit = user.role === "ADMIN" || user.role === "MANAGER"
@@ -74,6 +77,7 @@ export default async function DossiersPage({
                         {d.nom}
                       </Link>
                       <p className="text-xs text-muted-foreground">{d.numero}</p>
+                      <MessageBadge count={unreadCounts[d.id] ?? 0} className="mt-1" />
                     </div>
                   </div>
 

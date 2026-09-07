@@ -18,7 +18,7 @@ import { DossierEditDialog } from "@/components/dashboard/dossier-edit-dialog"
 import { requireUser, isStaff } from "@/lib/session"
 import { tacheStatutLabels, formatUsd, formatClientName, roleLabels } from "@/lib/domain"
 import { DossierProcessInstance } from "@/components/dashboard/dossier-process-instance"
-import { DossierChat } from "@/components/dashboard/dossier-chat"
+import { DossierChatDialog } from "@/components/dashboard/dossier-chat-dialog"
 import { getDossier, deleteDossier, getAgentsForSelect } from "../actions"
 import { getActiveProcessesForSelect } from "../../process/actions"
 import { deleteDocument } from "../../documents/actions"
@@ -115,6 +115,22 @@ export default async function DossierDetailPage({
             />
           ) : null}
         </div>
+      </div>
+
+      {/* Messagerie — bien visible mais compacte, s'ouvre en popup */}
+      <div className="mb-6">
+        <DossierChatDialog
+          dossierId={dossier.id}
+          dossierNom={dossier.nom}
+          currentUserId={currentUserId}
+          counterpartLabel={staff ? "le client" : "votre agent"}
+          initialMessages={messages.map((m) => ({
+            id: m.id,
+            texte: m.texte,
+            createdAt: m.createdAt,
+            sender: m.sender,
+          }))}
+        />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -242,7 +258,6 @@ export default async function DossierDetailPage({
           ) : null}
           <TabsTrigger value="documents">Documents ({dossier.documents.length})</TabsTrigger>
           {staff ? <TabsTrigger value="taches">Tâches ({dossier.taches.length})</TabsTrigger> : null}
-          <TabsTrigger value="messages">Messages ({messages.length})</TabsTrigger>
         </TabsList>
 
         {dossier.processDefinition ? (
@@ -363,19 +378,6 @@ export default async function DossierDetailPage({
             </Card>
           </TabsContent>
         ) : null}
-
-        <TabsContent value="messages">
-          <DossierChat
-            dossierId={dossier.id}
-            currentUserId={currentUserId}
-            initialMessages={messages.map((m) => ({
-              id: m.id,
-              texte: m.texte,
-              createdAt: m.createdAt,
-              sender: m.sender,
-            }))}
-          />
-        </TabsContent>
       </Tabs>
     </div>
   )

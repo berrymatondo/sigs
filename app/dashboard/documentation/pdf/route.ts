@@ -3,7 +3,8 @@ import { readFile } from "fs/promises"
 import { join } from "path"
 import { PdfBuilder, pdfSafe } from "@/lib/pdf-builder"
 import { requireUser, isStaff } from "@/lib/session"
-import { APP_NAME, APP_OVERVIEW, docSections } from "@/lib/documentation"
+import { roleLabels } from "@/lib/domain"
+import { APP_NAME, APP_OVERVIEW, docSections, filterDocSectionsForRole } from "@/lib/documentation"
 
 // Read a screenshot stored under /public (e.g. "/docs/home.png") as raw bytes.
 async function loadScreenshot(screenshot?: string) {
@@ -34,8 +35,9 @@ export async function GET() {
   for (const r of APP_OVERVIEW.roles) pdf.bullet(pdfSafe(`${r.role} : ${r.desc}`))
   pdf.spacer(10)
 
-  // Sections & pages
-  for (const section of docSections) {
+  // Sections & pages — filtered to what this role can actually do.
+  const sections = filterDocSectionsForRole(docSections, roleLabels[user.role])
+  for (const section of sections) {
     pdf.heading(pdfSafe(section.title))
     pdf.paragraph(pdfSafe(section.description), { color: undefined })
     pdf.spacer(6)

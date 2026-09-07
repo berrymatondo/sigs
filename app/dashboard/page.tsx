@@ -1,22 +1,39 @@
 import Link from "next/link"
-import { Users, FolderKanban, Clock, CheckCircle2, FileText, ListTodo } from "lucide-react"
+import {
+  Users,
+  FolderKanban,
+  Clock,
+  CheckCircle2,
+  FileText,
+  ListTodo,
+  DollarSign,
+  UserPlus,
+  Activity,
+  ArrowRight,
+} from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageHeader } from "@/components/dashboard/page-header"
 import { StatCard } from "@/components/dashboard/stat-card"
 import { StatutBadge, PrioriteBadge, DossierTypeIconTile } from "@/components/dashboard/badges"
 import { MiniStepper } from "@/components/dashboard/mini-stepper"
+import { KpiCard } from "@/components/dashboard/analytics/kpi-card"
+import { TrendChart } from "@/components/dashboard/analytics/trend-chart"
+import { StatusPieChart } from "@/components/dashboard/analytics/status-pie-chart"
 import { requireUser } from "@/lib/session"
-import { roleLabels, dossierTypeLabels, formatClientName } from "@/lib/domain"
+import { roleLabels, dossierTypeLabels, formatClientName, formatUsd } from "@/lib/domain"
 import { getDashboardStats, getRecentDossiers, getRecentTaches } from "./actions"
+import { getAnalytics } from "./analytics/actions"
 import { formatDistanceToNow } from "date-fns"
 import { fr } from "date-fns/locale"
 
 export default async function DashboardPage() {
   const user = await requireUser()
-  const [stats, dossiers, taches] = await Promise.all([
+  const isAdmin = user.role === "ADMIN"
+  const [stats, dossiers, taches, analytics] = await Promise.all([
     getDashboardStats(),
     getRecentDossiers(),
     getRecentTaches(),
+    isAdmin ? getAnalytics("30d", "ALL") : Promise.resolve(null),
   ])
 
   return (
@@ -144,6 +161,62 @@ export default async function DashboardPage() {
           </Card>
         )}
       </div>
+
+      {isAdmin && analytics ? (
+        <div className="mt-8">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 className="text-lg font-semibold tracking-tight">Vue stratégique</h2>
+              <p className="text-sm text-muted-foreground">
+                Tendances des 30 derniers jours, tous services confondus.
+              </p>
+            </div>
+            <Link
+              href="/dashboard/analytics"
+              className="flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+            >
+              Analytique complète <ArrowRight className="size-3.5" />
+            </Link>
+          </div>
+
+          <div className="mb-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <KpiCard
+              label="Chiffre d'affaires"
+              value={formatUsd(analytics.kpis.chiffreAffaires.value)}
+              icon={DollarSign}
+              delta={analytics.kpis.chiffreAffaires.delta}
+              showDelta={analytics.kpis.comparable}
+            />
+            <KpiCard
+              label="Taux de complétion"
+              value={`${analytics.kpis.tauxCompletion.value}%`}
+              icon={CheckCircle2}
+              delta={analytics.kpis.tauxCompletion.delta}
+              deltaSuffix=" pts"
+              showDelta={analytics.kpis.comparable}
+            />
+            <KpiCard
+              label="Nouveaux clients"
+              value={String(analytics.kpis.nouveauxClients.value)}
+              icon={UserPlus}
+              delta={analytics.kpis.nouveauxClients.delta}
+              showDelta={analytics.kpis.comparable}
+            />
+            <KpiCard
+              label="Dossiers actifs"
+              value={String(analytics.kpis.dossiersActifs.value)}
+              icon={Activity}
+              showDelta={false}
+              hint="en cours"
+            />
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-3">
+            <TrendChart data={analytics.timeseries} />
+            <StatusPieChart data={analytics.parStatut} />
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }

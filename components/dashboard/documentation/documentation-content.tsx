@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/accordion"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { docSections, type DocPageDoc } from "@/lib/documentation"
+import { docSections, filterDocSectionsForRole, type DocPageDoc } from "@/lib/documentation"
 
 function PageDetail({ page }: { page: DocPageDoc }) {
   return (
@@ -98,10 +98,11 @@ function PageDetail({ page }: { page: DocPageDoc }) {
   )
 }
 
-export function DocumentationContent() {
+export function DocumentationContent({ roleLabel }: { roleLabel: string }) {
+  const sections = filterDocSectionsForRole(docSections, roleLabel)
   return (
     <div className="flex flex-col gap-10">
-      {docSections.map((section) => (
+      {sections.map((section) => (
         <section key={section.id} aria-labelledby={`sec-${section.id}`} className="flex flex-col gap-4">
           <div>
             <h2 id={`sec-${section.id}`} className="text-lg font-semibold tracking-tight">

@@ -36,7 +36,31 @@ export async function getMessages(dossierId: string) {
     orderBy: { createdAt: "asc" },
     include: { sender: { select: { id: true, name: true, image: true, role: true } } },
   })
+  // Viewing the thread clears its unread badge, same as opening it from the bell.
+  await prisma.notification.updateMany({
+    where: { userId: user.id, type: "MESSAGE", lien: `/dashboard/dossiers/${dossierId}`, lu: false },
+    data: { lu: true },
+  })
   return { messages, currentUserId: user.id }
+}
+
+/**
+ * Unread MESSAGE-notification count per dossier, for the current user, so
+ * list views can badge dossiers that have an unread reply waiting.
+ */
+export async function getUnreadMessageCounts(): Promise<Record<string, number>> {
+  const user = await requireUser()
+  const rows = await prisma.notification.groupBy({
+    by: ["lien"],
+    where: { userId: user.id, type: "MESSAGE", lu: false, lien: { not: null } },
+    _count: { _all: true },
+  })
+  const counts: Record<string, number> = {}
+  for (const row of rows) {
+    const dossierId = row.lien?.split("/").pop()
+    if (dossierId) counts[dossierId] = row._count._all
+  }
+  return counts
 }
 
 export async function sendMessage(dossierId: string, texte: string) {
